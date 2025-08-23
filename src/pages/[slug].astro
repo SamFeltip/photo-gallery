@@ -23,19 +23,19 @@ export async function getStaticPaths() {
 }
 
 const images = import.meta.glob<{ default: ImageMetadata }>(
-  "../images/**/*.{jpg,jpeg,png,webp}"
+  "../images/**/*.{jpg,jpeg,png,webp}",
 );
 
 function getImagesForSlug(slug: string) {
   const matching = Object.entries(images).filter(([path]) =>
-    path.includes(`/images/${slug}/`)
+    path.includes(`/images/${slug}/`),
   );
 
   return Promise.all(
     matching.map(async ([_path, image]) => {
       const { default: imageData } = await image();
       return imageData;
-    })
+    }),
   );
 }
 
