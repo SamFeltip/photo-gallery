@@ -27,19 +27,19 @@ export async function getStaticPaths() {
 }
 
 const images = import.meta.glob<{ default: ImageMetadata }>(
-  "../images/**/*.{jpg,jpeg,png,webp}",
+  "../images/**/*.{jpg,jpeg,png,webp}"
 );
 
 function getImagesForSlug(slug: string) {
   const matching = Object.entries(images).filter(([path]) =>
-    path.includes(`/images/${slug}/`),
+    path.includes(`/images/${slug}/`)
   );
 
   return Promise.all(
     matching.map(async ([_path, image]) => {
       const { default: imageData } = await image();
       return imageData;
-    }),
+    })
   );
 }
 
@@ -48,9 +48,13 @@ if (slug === undefined) {
 }
 
 const slugImages = await getImagesForSlug(slug);
+
+function toTitleCase(str: string) {
+  return str.replace(/\b\w/g, (char) => char.toUpperCase());
+}
 ---
 
-<BaseLayout title=`Photos - ${slug}` description=`${slug} photos.`>
+<BaseLayout title={toTitleCase(slug)} description=`${slug} photos.`>
   <section class="justified-gallery" id="photoswipe">
     {
       slugImages.map((imageData, index) => (
