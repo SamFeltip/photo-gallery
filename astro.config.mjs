@@ -1,5 +1,6 @@
 import sitemap from "@astrojs/sitemap";
 import { defineConfig } from "astro/config";
+import vercel from "@astrojs/vercel/serverless";
 
 export default defineConfig({
   site: "https://photos.samfelton.com",
