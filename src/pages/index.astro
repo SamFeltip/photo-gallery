@@ -1,42 +1,63 @@
 ---
+import { getImage, Image } from "astro:assets";
 import fs from "fs";
 import path from "path";
 import BaseLayout from "~/layouts/BaseLayout.astro";
 
-const imagesDirPath = import.meta.env.PROD
-  ? import.meta.env.IMAGES_DIR_PROD
-  : import.meta.env.IMAGES_DIR_DEV;
-
-const imagesDir = new URL(imagesDirPath, import.meta.url).pathname;
-
-// Get all gallery folders
-const galleryFolders = fs
-  .readdirSync(imagesDir, { withFileTypes: true })
-  .filter((dirent) => dirent.isDirectory())
-  .map((dirent) => dirent.name);
-
-// For each gallery, get the first image file
-const galleries = galleryFolders.map((folder) => {
-  const folderPath = path.join(imagesDir, folder);
-  const images = fs
-    .readdirSync(folderPath)
-    .filter((file) => /\.(jpg|jpeg|png|gif|webp)$/i.test(file));
-  return {
-    name: folder,
-    preview: images.length > 0 ? `/preview/${folder}/card.jpeg` : null,
-    link: `/${folder}`,
-  };
+import previewImage from "../images/preview/devon/card.jpeg";
+import { imageConfig } from "astro:assets";
+const optimizedBackground = await getImage({
+  width: 10,
+  src: previewImage,
+  format: "avif",
 });
+
+const images = import.meta.glob<{ default: ImageMetadata }>(
+  "../images/preview/**/*.{jpg,jpeg,png,webp}"
+);
+
+const imageList = await Promise.all(
+  Object.values(images).map(async (image) => {
+    const { default: imageData } = await image();
+    return imageData;
+  })
+);
+
+const imageGalleries = await Promise.all(
+  imageList.map(async (image) => {
+    const name = image.src.split("/").slice(-2, -1)[0];
+    const smallImg = await getImage({
+      src: image.src,
+      width: 40,
+      fit: "cover",
+    });
+
+    return {
+      name: name,
+      link: `/${name}`,
+      image: image,
+      previewImageSrc: smallImg.src,
+    };
+  })
+);
 ---
 
 <BaseLayout>
   <ul id="galleries">
     {
-      galleries.map((gallery) => (
+      imageGalleries.map((gallery) => (
         <li class="gallery">
-          {gallery.preview && (
+          {gallery.name && (
             <a href={gallery.link}>
-              <img src={gallery.preview} alt={gallery.name + " preview"} />
+              <span
+                style={`background: url(${gallery.previewImageSrc}) center/cover no-repeat; width: 100%;`}
+              >
+                <Image
+                  src={gallery.image}
+                  layout="constrained"
+                  alt={gallery.name + " preview"}
+                />
+              </span>
               <h2 style="font-family: Unbounded; margin: 0; font-size: 1.5rem;">
                 {gallery.name}
               </h2>
@@ -75,9 +96,16 @@ const galleries = galleryFolders.map((folder) => {
       text-transform: capitalize;
     }
 
-    & img {
-      object-fit: cover;
+    & span {
       aspect-ratio: 4 / 3;
+      height: 100%;
+      width: 100%;
+    }
+
+    & img {
+      aspect-ratio: 4 / 3;
+      height: 100%;
+      width: 100%;
     }
   }
 

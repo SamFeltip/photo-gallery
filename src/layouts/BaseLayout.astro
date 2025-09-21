@@ -2,6 +2,7 @@
 import "~/styles/reset.css";
 import "~/styles/base.css";
 
+import SpeedInsights from "@vercel/speed-insights/astro";
 import smartypants from "smartypants";
 
 const siteName = "Photo Gallery";
@@ -24,6 +25,7 @@ const pageTitle =
 
 <html lang="en">
   <head>
+    <SpeedInsights />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
