@@ -1,26 +1,28 @@
 ---
 export const prerender = true;
 
-import { Image } from "astro:assets";
+import { CldImage } from "astro-cloudinary";
+
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import "@fancyapps/ui/dist/fancybox/fancybox.css";
-import fs from "fs";
-import path from "path";
 import { getCollection } from "astro:content";
 
 const { slug } = Astro.params;
 
 export async function getStaticPaths() {
   const galleries = await getCollection("galleries");
-  const galleryCollection = await getCollection("galleryCollections");
+  // const galleryCollection = await getCollection("galleryCollections");
+
+  const cloudinaryImages = await getCollection("cloudinaryImages");
 
   const galleryItems = galleries.map((gallery) => ({
     params: { slug: gallery.id },
     props: {
       gallery,
-      galleryCollection: galleryCollection.filter(
-        (col) => col.data.collection.id === gallery.id
-      ),
+      galleryCollection: cloudinaryImages,
+      // .filter(
+      //   (col) => col.data.asset_folder?.indexOf(gallery.id) !== -1
+      // ),
     },
   }));
 
@@ -38,20 +40,15 @@ function toTitleCase(str: string) {
   <section class="justified-gallery" id="photoswipe">
     {
       galleryCollection.map((galleryItem, index) => {
-        const image = galleryItem.data.img;
+        const image = galleryItem.data;
         return (
           <a
             style={`--width: ${image.width}; --height: ${image.height};`}
-            href={image.src}
+            href={galleryItem.data.url}
             target="_blank"
             data-fancybox="gallery"
           >
-            <Image
-              format="webp"
-              src={image}
-              alt=""
-              loading={index < 20 ? "eager" : "lazy"}
-            />
+            <CldImage src={galleryItem.data.url} format="webp" loading="lazy" />
           </a>
         );
       })

@@ -1,17 +1,8 @@
 ---
-import { getImage, Image } from "astro:assets";
+import { Image } from "astro:assets";
+import { CldImage } from "astro-cloudinary";
 import { getCollection } from "astro:content";
-import fs from "fs";
-import path from "path";
 import BaseLayout from "~/layouts/BaseLayout.astro";
-
-import previewImage from "../images/preview/devon/card.jpeg";
-import { imageConfig } from "astro:assets";
-const optimizedBackground = await getImage({
-  width: 10,
-  src: previewImage,
-  format: "avif",
-});
 
 const galleries = await getCollection("galleries");
 ---
@@ -25,7 +16,7 @@ const galleries = await getCollection("galleries");
             <a href={gallery.data.link}>
               {/* // style={`background: url(${gallery.previewImageSrc}) center/cover no-repeat; width: 100%;`} */}
               <span>
-                <Image
+                <CldImage
                   src={gallery.data.previewImg}
                   layout="constrained"
                   alt={gallery.data.name + " preview"}
