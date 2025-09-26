@@ -1,5 +1,6 @@
 ---
 import { getImage, Image } from "astro:assets";
+import { getCollection } from "astro:content";
 import fs from "fs";
 import path from "path";
 import BaseLayout from "~/layouts/BaseLayout.astro";
@@ -12,54 +13,26 @@ const optimizedBackground = await getImage({
   format: "avif",
 });
 
-const images = import.meta.glob<{ default: ImageMetadata }>(
-  "../images/preview/**/*.{jpg,jpeg,png,webp}"
-);
-
-const imageList = await Promise.all(
-  Object.values(images).map(async (image) => {
-    const { default: imageData } = await image();
-    return imageData;
-  })
-);
-
-const imageGalleries = await Promise.all(
-  imageList.map(async (image) => {
-    const name = image.src.split("/").slice(-2, -1)[0];
-    const smallImg = await getImage({
-      src: image.src,
-      width: 40,
-      fit: "cover",
-    });
-
-    return {
-      name: name,
-      link: `/${name}`,
-      image: image,
-      previewImageSrc: smallImg.src,
-    };
-  })
-);
+const galleries = await getCollection("galleries");
 ---
 
 <BaseLayout>
   <ul id="galleries">
     {
-      imageGalleries.map((gallery) => (
+      galleries.map((gallery) => (
         <li class="gallery">
-          {gallery.name && (
-            <a href={gallery.link}>
-              <span
-                style={`background: url(${gallery.previewImageSrc}) center/cover no-repeat; width: 100%;`}
-              >
+          {gallery.data.name && (
+            <a href={gallery.data.link}>
+              {/* // style={`background: url(${gallery.previewImageSrc}) center/cover no-repeat; width: 100%;`} */}
+              <span>
                 <Image
-                  src={gallery.image}
+                  src={gallery.data.previewImg}
                   layout="constrained"
-                  alt={gallery.name + " preview"}
+                  alt={gallery.data.name + " preview"}
                 />
               </span>
               <h2 style="font-family: Unbounded; margin: 0; font-size: 1.5rem;">
-                {gallery.name}
+                {gallery.data.name}
               </h2>
             </a>
           )}
@@ -106,6 +79,7 @@ const imageGalleries = await Promise.all(
       aspect-ratio: 4 / 3;
       height: 100%;
       width: 100%;
+      /* background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><rect width='100' height='100' fill='red'/></svg>"); */
     }
   }
 
