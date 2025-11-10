@@ -17,8 +17,18 @@ const galleries = defineCollection({
     z.object({
       id: z.string(),
       name: z.string(),
+      description: z.string().optional(),
       previewImg: z.string(),
       link: z.string(),
+      groups: z
+        .array(
+          z.object({
+            title: z.string(),
+            name: z.string(),
+            description: z.string(),
+          })
+        )
+        .default([]),
     }),
 });
 

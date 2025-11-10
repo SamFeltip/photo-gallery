@@ -2,8 +2,26 @@
   {
     "id": "surrey",
     "name": "surrey",
+    "description": "We went to brockham for their massive bonfire and fireworks show. We also played shuffleboard with some of Dan's family!",
     "previewImg": "https://res.cloudinary.com/dxmtoxrqa/image/upload/v1762772924/56ed9e35-b091-4a73-a4f4-c9160e4eda20_Original_iq1hu7.jpg",
-    "link": "/surrey"
+    "link": "/surrey",
+    "groups": [
+      {
+        "title": "brockham bonfire",
+        "name": "brockham",
+        "description": "The bonfire is at least 2 1/2 stories tall - it's absolute chaos dodging small kids holding flaming torches but a lot of fun."
+      },
+      {
+        "title": "surrey",
+        "name": "surrey",
+        "description": "We stayed at Dan's house and played a few boardgames, and ate the best garlic butter I've ever had (with pizza, not on it's own)."
+      },
+      {
+        "title": "shuffle board",
+        "name": "shuffleboard",
+        "description": "We played shuffleboard with Dan's family. Happy birthday Amanda!"
+      }
+    ]
   },
   {
     "id": "devon",
