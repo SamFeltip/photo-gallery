@@ -40,7 +40,11 @@ function toTitleCase(str: string) {
 }
 ---
 
-<BaseLayout title={toTitleCase(slug)} description=`${slug} photos.`>
+<BaseLayout
+  title={toTitleCase(slug)}
+  description=`${slug} photos.`
+  image={{ alt: slug, src: gallery.data.previewImg }}
+>
   <section class="justified-gallery" id="photoswipe">
     {
       galleryCollection.map((galleryItem, index) => {
