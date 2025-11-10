@@ -23,9 +23,9 @@ const galleries = defineCollection({
       groups: z
         .array(
           z.object({
-            title: z.string(),
             name: z.string(),
-            description: z.string(),
+            title: z.string().optional(),
+            description: z.string().optional(),
           })
         )
         .default([]),

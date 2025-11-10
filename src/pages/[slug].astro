@@ -100,11 +100,15 @@ function toTitleCase(str: string) {
       gallery.data.groups.length > 0 &&
         gallery.data.groups.map((group) => (
           <section style="margin-bottom: 1rem;">
-            <h2 style="margin-bottom: 0.25rem; font-size: 1.2rem; text-transform: capitalize; font-family: Unbounded;">
-              {group.title}
-            </h2>
-            <p style="margin-bottom: 0.5rem; ">{group.description}</p>
+            {group.title && (
+              <h2 style="margin-bottom: 0.25rem; font-size: 1.2rem; text-transform: capitalize; font-family: Unbounded;">
+                {group.title}
+              </h2>
+            )}
 
+            {group.description && (
+              <p style="margin-bottom: 0.5rem; ">{group.description}</p>
+            )}
             <div class="justified-gallery">
               {galleryGroups[group.name].map((galleryItem, index) => {
                 const image = galleryItem.data;
