@@ -19,9 +19,14 @@ export async function getStaticPaths() {
     params: { slug: gallery.id },
     props: {
       gallery,
-      galleryCollection: cloudinaryImages.filter(
-        (col) => (col.data as any).asset_folder?.indexOf(gallery.id) !== -1
-      ),
+      galleryCollection: cloudinaryImages
+        .filter(
+          (col) => (col.data as any).asset_folder?.indexOf(gallery.id) !== -1
+        )
+        .toSorted(
+          (a, b) =>
+            a.data.display_name?.localeCompare(b.data.display_name ?? "") ?? -1
+        ),
     },
   }));
 
