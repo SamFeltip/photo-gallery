@@ -185,7 +185,7 @@ function toTitleCase(str: string) {
     }
 
     .justified-gallery {
-      --space: max(2.5vw, 12px);
+      --space: clamp(12px, 1.25vw, 6px);
       --min-height: clamp(200px, 20vw, 400px);
 
       display: flex;
