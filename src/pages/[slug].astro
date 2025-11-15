@@ -1,75 +1,74 @@
 ---
-export const prerender = true;
+export const prerender = false;
+
 import { CldImage } from "astro-cloudinary";
 
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import "@fancyapps/ui/dist/fancybox/fancybox.css";
 import { getCollection } from "astro:content";
 import type { CollectionEntry } from "astro:content";
+import { getEntry } from "astro:content";
 
 const { slug } = Astro.params;
 
-export async function getStaticPaths() {
-  const galleries = await getCollection("galleries");
-  // const galleryCollection = await getCollection("galleryCollections");
-
-  const cloudinaryImages = await getCollection("cloudinaryImages");
-
-  const galleryItems = galleries.map((gallery) => {
-    console.log({ gallery: gallery, groups: gallery.data.groups });
-    const groupNames: string[] = gallery.data.groups.map((g) => g.name);
-
-    const imgGroups: Record<string, CollectionEntry<"cloudinaryImages">[]> =
-      Object.fromEntries(groupNames.map((k) => [k, []]));
-
-    // get valid images
-    const imgs = cloudinaryImages.filter(
-      (col) => (col.data as any).asset_folder?.indexOf(gallery.id) !== -1
-    );
-
-    // load images into image groups
-    imgs.forEach((item) => {
-      for (let groupName of groupNames) {
-        console.log({ groupName });
-        if (
-          item.data.display_name &&
-          item.data.display_name.indexOf(`_${groupName}_`) > -1
-        ) {
-          imgGroups[groupName].push(item);
-        }
-      }
-    });
-
-    // sort img groups
-    Object.keys(imgGroups).forEach((g) => {
-      imgGroups[g].sort(
-        (a, b) =>
-          a.data.display_name?.localeCompare(b.data.display_name ?? "") ?? -1
-      );
-    });
-
-    return {
-      params: { slug: gallery.id },
-      props: {
-        gallery,
-        galleryGroups: imgGroups,
-        galleryCollection: cloudinaryImages
-          .filter(
-            (col) => (col.data as any).asset_folder?.indexOf(gallery.id) !== -1
-          )
-          .toSorted(
-            (a, b) =>
-              a.data.display_name?.localeCompare(b.data.display_name ?? "") ??
-              -1
-          ),
-      },
-    };
+// No product found
+if (!slug) {
+  return new Response(null, {
+    status: 400,
+    statusText: "Invalid request",
   });
-
-  return galleryItems;
 }
 
-const { gallery, galleryCollection, galleryGroups } = Astro.props;
+const gallery = await getEntry("galleries", slug);
+
+if (!gallery) {
+  return new Response(null, {
+    status: 404,
+    statusText: "Not Found",
+  });
+}
+
+const cloudinaryImages = await getCollection("cloudinaryImages");
+
+// get gallery collection when no groups are present.
+const galleryCollection = cloudinaryImages
+  .filter((col) => (col.data as any).asset_folder?.indexOf(gallery.id) !== -1)
+  .toSorted(
+    (a, b) =>
+      a.data.display_name?.localeCompare(b.data.display_name ?? "") ?? -1
+  );
+
+// get gallery groups
+const groupNames: string[] = gallery.data.groups.map((g) => g.name);
+
+const imgGroups: Record<string, CollectionEntry<"cloudinaryImages">[]> =
+  Object.fromEntries(groupNames.map((k) => [k, []]));
+
+// get valid images
+const imgs = cloudinaryImages.filter(
+  (col) => (col.data as any).asset_folder?.indexOf(gallery.id) !== -1
+);
+
+// load images into image groups
+imgs.forEach((item) => {
+  for (let groupName of groupNames) {
+    console.log({ groupName });
+    if (
+      item.data.display_name &&
+      item.data.display_name.indexOf(`_${groupName}_`) > -1
+    ) {
+      imgGroups[groupName].push(item);
+    }
+  }
+});
+
+// sort img groups
+Object.keys(imgGroups).forEach((g) => {
+  imgGroups[g].sort(
+    (a, b) =>
+      a.data.display_name?.localeCompare(b.data.display_name ?? "") ?? -1
+  );
+});
 
 function toTitleCase(str: string) {
   return str.replace(/\b\w/g, (char) => char.toUpperCase());
@@ -79,26 +78,27 @@ function toTitleCase(str: string) {
 <BaseLayout
   title={toTitleCase(slug)}
   description=`${slug} photos.`
-  image={{ alt: slug, src: gallery.data.previewImg }}
+  image={{ alt: slug, src: gallery?.data.previewImg }}
 >
+  {!gallery && <h1>gallery not exist!</h1>}
   <main>
     <section>
       <h1
         style="margin-bottom: 0.25rem; font-size: 1.5rem; text-transform: capitalize;"
       >
-        {gallery.data.name}
+        {gallery?.data.name}
       </h1>
       {
-        gallery.data.description && (
-          <p style="margin-bottom: 0.5rem; ">{gallery.data.description}</p>
+        gallery?.data.description && (
+          <p style="margin-bottom: 0.5rem; ">{gallery?.data.description}</p>
         )
       }
     </section>
 
     <!-- when photos are seperated into groups -->
     {
-      gallery.data.groups.length > 0 &&
-        gallery.data.groups.map((group) => (
+      gallery?.data.groups.length > 0 &&
+        gallery?.data.groups.map((group) => (
           <section style="margin-bottom: 1rem;">
             {group.title && (
               <h2 style="margin-bottom: 0.25rem; font-size: 1.2rem; text-transform: capitalize; font-family: Unbounded;">
@@ -110,7 +110,7 @@ function toTitleCase(str: string) {
               <p style="margin-bottom: 0.5rem; ">{group.description}</p>
             )}
             <div class="justified-gallery">
-              {galleryGroups[group.name].map((galleryItem, index) => {
+              {imgGroups[group.name].map((galleryItem, index) => {
                 const image = galleryItem.data;
                 return (
                   <a
@@ -135,7 +135,7 @@ function toTitleCase(str: string) {
     <!-- when there are no groups -->
     <section class="justified-gallery" id="photoswipe">
       {
-        gallery.data.groups.length == 0 &&
+        gallery?.data.groups.length == 0 &&
           galleryCollection.map((galleryItem, index) => {
             const image = galleryItem.data;
             return (

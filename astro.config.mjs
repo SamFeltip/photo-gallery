@@ -1,8 +1,9 @@
 import sitemap from "@astrojs/sitemap";
 import { defineConfig } from "astro/config";
-import vercel from "@astrojs/vercel";
 import path from "path";
 import { imageService } from "@unpic/astro/service";
+
+import cloudflare from "@astrojs/cloudflare";
 
 export default defineConfig({
   site: "https://photos.samfelton.com",
@@ -16,12 +17,16 @@ export default defineConfig({
       layout: "constrained",
     }),
   },
-  adapter: vercel({
-    webAnalytics: {
+  adapter: cloudflare({
+    platformProxy: {
       enabled: true,
+      configPath: "wrangler.jsonc",
+      persist: {
+        path: "./.cache/wrangler/v3",
+      },
     },
-    maxDuration: 8,
-    imageService: true,
+    output: "server",
+    imageService: "passthrough",
   }),
   devToolbar: {
     enabled: false,
