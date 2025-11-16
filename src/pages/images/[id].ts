@@ -1,58 +1,28 @@
-// export const prerender = false;
+export const prerender = false;
 
 import type { APIContext, APIRoute } from "astro";
 
-export const POST: APIRoute = async ({
-  locals,
-  params,
-  request,
-}: APIContext) => {
-  console.log("hello world");
-  const { MY_VARIABLE, gallery_images } = locals.runtime.env;
-  const form = await request.formData();
-  const file = form.get("file") as File | null;
-  const name = form.get("name") as string | null;
-
-  if (!name) {
-    throw new Error("include name");
-  }
-
-  gallery_images.put(name, file);
-
-  const items = await gallery_images.list();
-
-  console.log(items);
-
-  return new Response(JSON.stringify(items));
-};
-
-export const GET: APIRoute = async ({
-  locals,
-  params,
-  request,
-}: APIContext) => {
-  //   const s = locals.runtime.env.gallery_images;
+export const GET: APIRoute = async ({ locals, params }: APIContext) => {
   const id = params.id;
 
   if (!id) {
-    throw new Error("id doesn't exist");
+    return new Response("id doesn't exist", { status: 400 });
   }
 
-  const { MY_VARIABLE, gallery_images } = locals.runtime.env;
+  const { gallery_images } = locals.runtime.env;
 
-  const items = await gallery_images.list();
-  console.log({ items });
+  const object = await gallery_images.get(id);
 
-  const s = await gallery_images.get(id);
-  if (!s) {
-    throw new Error("id is not present in bucket");
+  if (!object) {
+    return new Response("key is not present", { status: 404 });
   }
 
-  console.log({ s });
+  if (!object.body) {
+    console.error("image missing body", id);
+    return new Response("image missing body", { status: 500 });
+  }
 
-  return new Response(s.body, {
-    headers: {
-      "Content-Type": "image/png",
-    },
+  return new Response(object.body, {
+    headers: { "Content-Type": object.httpMetadata?.contentType ?? "" },
   });
 };

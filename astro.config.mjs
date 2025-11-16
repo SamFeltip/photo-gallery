@@ -18,12 +18,10 @@ export default defineConfig({
     }),
   },
   adapter: cloudflare({
+    runtime: { mode: "local" },
     platformProxy: {
       enabled: true,
       configPath: "wrangler.jsonc",
-      persist: {
-        path: "./.cache/wrangler/v3",
-      },
     },
     output: "server",
     imageService: "passthrough",

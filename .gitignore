@@ -21,6 +21,7 @@ pnpm-debug.log*
 .DS_Store
 
 .cache
+.wrangler
 
 # jetbrains setting folder
 .idea/

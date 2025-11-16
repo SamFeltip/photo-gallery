@@ -2,8 +2,9 @@
 
 ---
 
-<form method="POST" action="/images/abc">
-  <input type="file" name="file" />
+<form method="POST" action="/images" enctype="multipart/form-data">
+  <input type="file" id="file" name="file" accept="image/png, image/jpeg" />
+
   <input type="text" name="name" />
   <button type="submit">Submit</button>
 </form>
