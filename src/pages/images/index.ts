@@ -1,11 +1,7 @@
 export const prerender = false;
 
 import type { APIContext, APIRoute } from "astro";
-export const GET: APIRoute = async ({
-  locals,
-  params,
-  request,
-}: APIContext) => {
+export const GET: APIRoute = async ({ locals }: APIContext) => {
   console.log("hello world");
   const { gallery_images } = locals.runtime.env;
   console.log({ gallery_images });
