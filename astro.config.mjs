@@ -15,6 +15,12 @@ export default defineConfig({
       layout: "constrained",
     }),
   },
+  build: {
+    assetsPrefix: {
+      jpg: "https://photos.samfelton.com/cdn-cgi/image/",
+      fallback: "https://photos.samfelton.com",
+    },
+  },
   adapter: cloudflare({
     platformProxy: {
       enabled: true,
