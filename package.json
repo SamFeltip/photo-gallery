@@ -20,11 +20,14 @@
     "@astrojs/sitemap": "^3.4.1",
     "@fancyapps/ui": "^6.0.17",
     "@unpic/astro": "^1.0.1",
+    "@unpic/placeholder": "^0.1.2",
     "@vercel/speed-insights": "^1.2.0",
     "astro": "^5.12.3",
     "astro-cloudinary": "^1.3.4",
+    "blurhash": "^2.0.5",
     "smartypants": "^0.2.2",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "unpic": "^4.2.2"
   },
   "devDependencies": {
     "@astrojs/vercel": "^8.2.7",

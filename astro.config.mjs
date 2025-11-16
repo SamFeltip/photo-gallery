@@ -4,27 +4,24 @@ import path from "path";
 import { imageService } from "@unpic/astro/service";
 
 import cloudflare from "@astrojs/cloudflare";
+import { transform } from "unpic/providers/cloudflare";
 
 export default defineConfig({
   site: "https://photos.samfelton.com",
   output: "server",
   image: {
-    domains: ["res.cloudinary.com"],
-    layout: "constrained",
     service: imageService({
-      fallbackService: "cloudinary",
       placeholder: "blurhash",
       layout: "constrained",
     }),
   },
   adapter: cloudflare({
-    runtime: { mode: "local" },
     platformProxy: {
       enabled: true,
       configPath: "wrangler.jsonc",
     },
     output: "server",
-    imageService: "passthrough",
+    imageService: "cloudflare",
   }),
   devToolbar: {
     enabled: false,

@@ -1,7 +1,10 @@
 ---
 export const prerender = true;
 
-import { CldImage } from "astro-cloudinary";
+// import { Image } from "astro:assets";
+import { Image } from "@unpic/astro";
+// import { transform } from "unpic/providers/cloudflare";
+
 import { getCollection } from "astro:content";
 import BaseLayout from "~/layouts/BaseLayout.astro";
 
@@ -12,25 +15,51 @@ const galleries = await getCollection("galleries");
   <h1>wowiee</h1>
   <ul id="galleries">
     {
-      galleries.map((gallery) => (
-        <li class="gallery">
-          {gallery.data.name && (
-            <a href={gallery.data.link}>
-              {/* // style={`background: url(${gallery.previewImageSrc}) center/cover no-repeat; width: 100%;`} */}
-              <span>
-                <CldImage
+      galleries.map(async (gallery) => {
+        return (
+          <li class="gallery">
+            {gallery.data.name && (
+              <a href={gallery.data.link}>
+                {/* // style={`background: url(${gallery.previewImageSrc}) center/cover no-repeat; width: 100%;`} */}
+                <span>
+                  <Image
+                    src={gallery.data.previewImg}
+                    alt={gallery.data.name + " preview"}
+                    height={300}
+                    width={400}
+                    layout="constrained"
+                    options={{
+                      cloudflare: {
+                        domain: "",
+                      },
+                    }}
+                    operations={{
+                      cloudflare: {
+                        blur: 0.9,
+                      },
+                    }}
+                  />
+                  {/* options={{
+                      cloudflare: {
+                        domain: "example.com",
+                      },
+                    }} */}
+                  {/* // style="object-fit: cover;" */}
+                  {/* style={gallery.data.placeholder} */}
+                  {/* <CldImage
                   src={gallery.data.previewImg}
                   layout="constrained"
                   alt={gallery.data.name + " preview"}
-                />
-              </span>
-              <h2 style="font-family: Unbounded; margin: 0; font-size: 1.5rem;">
-                {gallery.data.name}
-              </h2>
-            </a>
-          )}
-        </li>
-      ))
+                  /> */}
+                </span>
+                <h2 style="font-family: Unbounded; margin: 0; font-size: 1.5rem;">
+                  {gallery.data.name}
+                </h2>
+              </a>
+            )}
+          </li>
+        );
+      })
     }
   </ul>
 </BaseLayout>
