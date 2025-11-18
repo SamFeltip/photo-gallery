@@ -1,18 +1,14 @@
 ---
-// export const prerender = false;
-
-// import { Image } from "astro:assets";
-import { Image } from "@unpic/astro";
-// import { transform } from "unpic/providers/cloudflare";
+export const prerender = false;
 
 import { getCollection } from "astro:content";
+import MyImage from "~/components/MyImage.astro";
 import BaseLayout from "~/layouts/BaseLayout.astro";
 
 const galleries = await getCollection("galleries");
 ---
 
 <BaseLayout>
-  <h1>wowiee</h1>
   <ul id="galleries">
     {
       galleries.map(async (gallery) => {
@@ -20,28 +16,13 @@ const galleries = await getCollection("galleries");
           <li class="gallery">
             {gallery.data.name && (
               <a href={gallery.data.link}>
-                {/* // style={`background: url(${gallery.previewImageSrc}) center/cover no-repeat; width: 100%;`} */}
                 <span>
-                  <Image
+                  <MyImage
                     src={gallery.data.previewImg}
                     alt={gallery.data.name + " preview"}
                     width={400}
                     height={300}
-                    options={{
-                      cloudflare: {
-                        domain: "photos.samfelton.com",
-                      },
-                    }}
                   />
-                  {/* // height={300}
-                    // width={400} */}
-                  {/* // style="object-fit: cover;" */}
-                  {/* style={gallery.data.placeholder} */}
-                  {/* <CldImage
-                  src={gallery.data.previewImg}
-                  layout="constrained"
-                  alt={gallery.data.name + " preview"}
-                  /> */}
                 </span>
                 <h2 style="font-family: Unbounded; margin: 0; font-size: 1.5rem;">
                   {gallery.data.name}

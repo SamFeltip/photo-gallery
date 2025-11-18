@@ -1,0 +1,21 @@
+---
+import { Image } from "@unpic/astro";
+import { getBlurhash } from "~/lib/getBlurhash";
+
+const { src, alt, width, height } = Astro.props;
+
+const blurhash = await getBlurhash(src);
+---
+
+<Image
+  src={src}
+  alt={alt}
+  width={width}
+  height={height}
+  background={blurhash}
+  options={{
+    cloudflare: {
+      domain: "photos.samfelton.com",
+    },
+  }}
+/>

@@ -19,7 +19,7 @@ import { file } from "astro/loaders";
 
 const galleries = defineCollection({
   loader: file("src/content/galleries.json"),
-  schema: ({ image }) =>
+  schema: () =>
     z.object({
       id: z.string(),
       name: z.string(),
