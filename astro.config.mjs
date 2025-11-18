@@ -16,10 +16,11 @@ export default defineConfig({
     }),
   },
   build: {
-    assetsPrefix: {
-      jpg: "https://photos.samfelton.com/cdn-cgi/image/",
-      fallback: "https://photos.samfelton.com",
-    },
+    // assetsPrefix: "https://cdn.example.com",
+    // assetsPrefix: {
+    //   jpg: "https://photos.samfelton.com/cdn-cgi/image/",
+    //   fallback: "https://photos.samfelton.com",
+    // },
   },
   adapter: cloudflare({
     platformProxy: {
@@ -27,6 +28,7 @@ export default defineConfig({
       configPath: "wrangler.jsonc",
     },
     output: "server",
+    // imageService: "custom",
     imageService: "cloudflare",
   }),
   devToolbar: {
