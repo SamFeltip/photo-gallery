@@ -35,7 +35,7 @@ export default defineConfig({
     // imageService: "compile",
     // imageService: "passthrough",
     // imageService: "custom",
-    // imageService: "cloudflare",
+    imageService: "cloudflare",
   }),
   devToolbar: {
     enabled: false,
