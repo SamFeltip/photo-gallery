@@ -5,6 +5,7 @@ import path from "path";
 // import { imageService } from "unpic/providers/cloudflare";
 
 import cloudflare from "@astrojs/cloudflare";
+import { imageService } from "@unpic/astro/service";
 
 /**
  * {
@@ -17,11 +18,18 @@ export default defineConfig({
   site: "https://photos.samfelton.com",
   output: "server",
   image: {
-    domains: [
-      "photos.samfelton.com",
-      "https://photo-gallery.awesome-fauns-0v.workers.dev",
-    ],
-    // service: passthroughImageService(),
+    domains: ["https://photos.samfelton.com"],
+    service: imageService({
+      fallbackService: "cloudflare",
+      placeholder: "blurhash",
+      layout: "constrained",
+      cdnOptions: {
+        cloudflare: {
+          domain: "https://photos.samfelton.com",
+        },
+      },
+      // domains: ["photos.samfelton.com"],
+    }),
     layout: "none",
   },
   build: {

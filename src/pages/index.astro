@@ -25,17 +25,8 @@ const galleries = await getCollection("galleries");
                   <Image
                     src={gallery.data.previewImg}
                     alt={gallery.data.name + " preview"}
-                    layout="constrained"
                     width={400}
                     height={300}
-                    operations={{
-                      cloudflare: {
-                        width: 40,
-                        height: 30,
-                        format: "auto",
-                        blur: 0.8,
-                      },
-                    }}
                     options={{
                       cloudflare: {
                         domain: "photos.samfelton.com",
