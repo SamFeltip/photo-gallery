@@ -17,12 +17,6 @@
       "binding": "gallery_images",
     },
   ],
-  "kv_namespaces": [
-    {
-      "id": "blurhash-store",
-      "binding": "blurhash_store",
-    },
-  ],
   "vars": {
     "MY_VARIABLE": "test",
   },
