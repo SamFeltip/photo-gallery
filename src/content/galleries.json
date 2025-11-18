@@ -3,7 +3,7 @@
     "id": "surrey",
     "name": "surrey",
     "description": "We went to brockham for their massive bonfire and fireworks show. We also played shuffleboard with some of Dan's family!",
-    "previewImg": "/images/preview-surrey.jpg",
+    "previewImg": "preview-surrey.jpg",
     "link": "/surrey",
     "groups": [
       {
@@ -26,19 +26,19 @@
   {
     "id": "devon",
     "name": "devon",
-    "previewImg": "/images/preview-devon.jpg",
+    "previewImg": "preview-devon.jpg",
     "link": "/devon"
   },
   {
     "id": "engagement",
     "name": "engagement",
-    "previewImg": "/images/preview-engagement.jpg",
+    "previewImg": "preview-engagement.jpg",
     "link": "/engagement"
   },
   {
     "id": "hathersage",
     "name": "hathersage",
-    "previewImg": "/images/preview-hathersage.jpg",
+    "previewImg": "preview-hathersage.jpg",
     "link": "/hathersage"
   }
 ]
