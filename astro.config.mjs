@@ -1,7 +1,8 @@
 import sitemap from "@astrojs/sitemap";
 import { defineConfig } from "astro/config";
 import path from "path";
-import { imageService } from "@unpic/astro/service";
+// import { imageService } from "@unpic/astro/service";
+import { imageService } from "unpic/providers/cloudflare";
 
 import cloudflare from "@astrojs/cloudflare";
 
@@ -15,10 +16,10 @@ import cloudflare from "@astrojs/cloudflare";
 export default defineConfig({
   site: "https://photos.samfelton.com",
   output: "server",
-  // image: {
-  //   service: imageService(),
-  //   layout: "none",
-  // },
+  image: {
+    service: imageService(),
+    layout: "none",
+  },
   build: {
     // assetsPrefix: "https://cdn.example.com",
     // assetsPrefix: {
@@ -35,7 +36,7 @@ export default defineConfig({
     // imageService: "compile",
     // imageService: "passthrough",
     // imageService: "custom",
-    imageService: "cloudflare",
+    // imageService: "cloudflare",
   }),
   devToolbar: {
     enabled: false,
