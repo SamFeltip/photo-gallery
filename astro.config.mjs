@@ -18,7 +18,7 @@ export default defineConfig({
   output: "server",
   image: {
     domains: ["photos.samfelton.com"],
-    service: passthroughImageService(),
+    // service: passthroughImageService(),
     layout: "none",
   },
   build: {
@@ -35,7 +35,7 @@ export default defineConfig({
     },
     output: "server",
     // imageService: "compile",
-    imageService: "passthrough",
+    // imageService: "passthrough",
     // imageService: "custom",
     // imageService: "cloudflare",
   }),
