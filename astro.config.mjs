@@ -1,7 +1,7 @@
 import sitemap from "@astrojs/sitemap";
 import { passthroughImageService, defineConfig } from "astro/config";
 import path from "path";
-import { imageService } from "@unpic/astro/service";
+// import { imageService } from "@unpic/astro/service";
 // import { imageService } from "unpic/providers/cloudflare";
 
 import cloudflare from "@astrojs/cloudflare";
@@ -35,9 +35,9 @@ export default defineConfig({
     },
     output: "server",
     // imageService: "compile",
-    // imageService: "passthrough",
+    imageService: "passthrough",
     // imageService: "custom",
-    imageService: "cloudflare",
+    // imageService: "cloudflare",
   }),
   devToolbar: {
     enabled: false,
