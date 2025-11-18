@@ -1,8 +1,8 @@
 import sitemap from "@astrojs/sitemap";
 import { defineConfig } from "astro/config";
 import path from "path";
-// import { imageService } from "@unpic/astro/service";
-import { imageService } from "unpic/providers/cloudflare";
+import { imageService } from "@unpic/astro/service";
+// import { imageService } from "unpic/providers/cloudflare";
 
 import cloudflare from "@astrojs/cloudflare";
 
