@@ -4,17 +4,21 @@ import path from "path";
 import { imageService } from "@unpic/astro/service";
 
 import cloudflare from "@astrojs/cloudflare";
-import { transform } from "unpic/providers/cloudflare";
+
+/**
+ * {
+      // placeholder: "blurhash",
+      // layout: "constrained",
+    }
+ */
 
 export default defineConfig({
   site: "https://photos.samfelton.com",
   output: "server",
-  image: {
-    service: imageService({
-      placeholder: "blurhash",
-      layout: "constrained",
-    }),
-  },
+  // image: {
+  //   service: imageService(),
+  //   layout: "none",
+  // },
   build: {
     // assetsPrefix: "https://cdn.example.com",
     // assetsPrefix: {
@@ -28,7 +32,8 @@ export default defineConfig({
       configPath: "wrangler.jsonc",
     },
     output: "server",
-    imageService: "passthrough",
+    // imageService: "compile",
+    // imageService: "passthrough",
     // imageService: "custom",
     // imageService: "cloudflare",
   }),

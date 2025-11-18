@@ -1,5 +1,5 @@
 ---
-export const prerender = true;
+export const prerender = false;
 
 // import { Image } from "astro:assets";
 import { Image } from "@unpic/astro";
@@ -22,13 +22,24 @@ const galleries = await getCollection("galleries");
               <a href={gallery.data.link}>
                 {/* // style={`background: url(${gallery.previewImageSrc}) center/cover no-repeat; width: 100%;`} */}
                 <span>
+                  {/* // src={gallery.data.previewImg} */}
                   <Image
-                    src={gallery.data.previewImg}
+                    src={"/images/preview-devon.jpg"}
                     alt={gallery.data.name + " preview"}
                     layout="constrained"
+                    width={400}
+                    height={300}
+                    operations={{
+                      cloudflare_images: {
+                        width: 40,
+                        height: 30,
+                        format: "auto",
+                        blur: 0.8,
+                      },
+                    }}
                     options={{
-                      cloudflare: {
-                        domain: "photos.samfelton.com",
+                      cloudflare_images: {
+                        host: "photos.samfelton.com",
                       },
                     }}
                   />

@@ -20,7 +20,7 @@ export const POST: APIRoute = async ({
   request,
 }: APIContext) => {
   console.log("hello world");
-  const { MY_VARIABLE, gallery_images } = locals.runtime.env;
+  const { gallery_images } = locals.runtime.env;
   const form = await request.formData();
   const file = form.get("file") as File | null;
 
