@@ -6,6 +6,7 @@ import MyImage from "~/components/MyImage.astro";
 import BaseLayout from "~/layouts/BaseLayout.astro";
 
 const galleries = await getCollection("galleries");
+console.log("gallery count: ", galleries.length);
 ---
 
 <BaseLayout>

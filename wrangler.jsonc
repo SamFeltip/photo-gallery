@@ -19,5 +19,6 @@
   ],
   "vars": {
     "MY_VARIABLE": "test",
+    "DOMAIN": "photos.samfelton.com",
   },
 }
