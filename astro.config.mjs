@@ -28,8 +28,9 @@ export default defineConfig({
       configPath: "wrangler.jsonc",
     },
     output: "server",
+    imageService: "passthrough",
     // imageService: "custom",
-    imageService: "cloudflare",
+    // imageService: "cloudflare",
   }),
   devToolbar: {
     enabled: false,

@@ -1,8 +1,8 @@
 ---
 export const prerender = true;
 
-import { Image } from "astro:assets";
-// import { Image } from "@unpic/astro";
+// import { Image } from "astro:assets";
+import { Image } from "@unpic/astro";
 // import { transform } from "unpic/providers/cloudflare";
 
 import { getCollection } from "astro:content";
@@ -25,15 +25,15 @@ const galleries = await getCollection("galleries");
                   <Image
                     src={gallery.data.previewImg}
                     alt={gallery.data.name + " preview"}
-                    height={300}
-                    width={400}
                     layout="constrained"
-                  />
-                  {/* options={{
+                    options={{
                       cloudflare: {
-                        domain: "example.com",
+                        domain: "photos.samfelton.com",
                       },
-                    }} */}
+                    }}
+                  />
+                  {/* // height={300}
+                    // width={400} */}
                   {/* // style="object-fit: cover;" */}
                   {/* style={gallery.data.placeholder} */}
                   {/* <CldImage
