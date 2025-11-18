@@ -22,9 +22,8 @@ const galleries = await getCollection("galleries");
               <a href={gallery.data.link}>
                 {/* // style={`background: url(${gallery.previewImageSrc}) center/cover no-repeat; width: 100%;`} */}
                 <span>
-                  {/* // src={gallery.data.previewImg} */}
                   <Image
-                    src={"/images/preview-devon.jpg"}
+                    src={gallery.data.previewImg}
                     alt={gallery.data.name + " preview"}
                     layout="constrained"
                     width={400}
