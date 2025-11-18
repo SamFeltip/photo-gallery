@@ -17,7 +17,10 @@ export default defineConfig({
   site: "https://photos.samfelton.com",
   output: "server",
   image: {
-    domains: ["photos.samfelton.com"],
+    domains: [
+      "photos.samfelton.com",
+      "https://photo-gallery.awesome-fauns-0v.workers.dev",
+    ],
     // service: passthroughImageService(),
     layout: "none",
   },
