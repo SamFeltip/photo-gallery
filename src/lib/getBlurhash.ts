@@ -33,19 +33,19 @@ export async function getBlurhashFromBucket(
 
 export async function getBlurhash(src: string): Promise<string> {
   console.log("Generating blurhash for:", src);
-  const transformedImg = transform(src, {
+  const transformedImg = transform("/images/" + src, {
     width: 100,
     quality: 70,
-    format: "png",
+    format: "jpg",
   });
   console.log("Transformed image URL:", transformedImg);
 
-  const jpgData = await getPixels(
+  const imgData = await getPixels(
     "https://photos.samfelton.com" + transformedImg
   );
 
-  const data = Uint8ClampedArray.from(jpgData.data);
-  const blurhash = encode(data, jpgData.width, jpgData.height, 4, 4);
+  const data = Uint8ClampedArray.from(imgData.data);
+  const blurhash = encode(data, imgData.width, imgData.height, 4, 4);
   console.log("Generated blurhash:", blurhash);
 
   const cssgradient = blurhashToCssGradientString(blurhash);

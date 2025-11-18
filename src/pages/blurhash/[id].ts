@@ -4,7 +4,7 @@ import { getPixels } from "@unpic/pixels";
 import { blurhashToCssGradientString } from "@unpic/placeholder";
 import type { APIContext, APIRoute } from "astro";
 import { encode } from "blurhash";
-import { getBlurhashFromBucket } from "~/lib/getBlurhash";
+import { getBlurhash, getBlurhashFromBucket } from "~/lib/getBlurhash";
 
 export const GET: APIRoute = async ({ locals, params }: APIContext) => {
   const id = params.id;
@@ -16,6 +16,7 @@ export const GET: APIRoute = async ({ locals, params }: APIContext) => {
   const { gallery_images } = locals.runtime.env;
 
   const cssgradient = await getBlurhashFromBucket(gallery_images, id);
+  // const cssgradient = await getBlurhash(id);
 
   return new Response(cssgradient);
 };
