@@ -1,5 +1,5 @@
 import sitemap from "@astrojs/sitemap";
-import { defineConfig } from "astro/config";
+import { passthroughImageService, defineConfig } from "astro/config";
 import path from "path";
 import { imageService } from "@unpic/astro/service";
 // import { imageService } from "unpic/providers/cloudflare";
@@ -17,7 +17,8 @@ export default defineConfig({
   site: "https://photos.samfelton.com",
   output: "server",
   image: {
-    service: imageService(),
+    domains: ["photos.samfelton.com"],
+    service: passthroughImageService(),
     layout: "none",
   },
   build: {
@@ -36,7 +37,7 @@ export default defineConfig({
     // imageService: "compile",
     // imageService: "passthrough",
     // imageService: "custom",
-    // imageService: "cloudflare",
+    imageService: "cloudflare",
   }),
   devToolbar: {
     enabled: false,
