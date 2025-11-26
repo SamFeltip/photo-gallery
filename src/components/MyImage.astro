@@ -1,7 +1,6 @@
 ---
 import { Image } from "@unpic/astro";
-import { getBlurhash, getBlurhashFromBucket } from "~/lib/getBlurhash";
-import { GET } from "~/pages/blurhash/[id]";
+import { getBlurhash } from "~/lib/getBlurhash";
 
 type Props = {
   src: string;
@@ -12,12 +11,19 @@ type Props = {
 
 const { src, alt, width, height }: Props = Astro.props;
 
-const gimgs = Astro.locals.runtime.env.gallery_images;
+const gimgs = Astro.locals.runtime.env.GALLERY_HASHMAPS;
 
-// const blurhash = await getBlurhashFromBucket(gimgs, src);
-const blurhash = await getBlurhash(src);
+let blurhash;
+let error;
+try {
+  blurhash = await getBlurhash(gimgs, src);
+} catch (e) {
+  console.error("Error getting blurhash for ", src, e);
+  error = (e as Error).message;
+}
 ---
 
+<p>{error}</p>
 <Image
   src={"/images/" + src}
   alt={alt}

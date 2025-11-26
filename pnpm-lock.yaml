@@ -41,6 +41,9 @@ importers:
       blurhash:
         specifier: ^2.0.5
         version: 2.0.5
+      jpeg-js:
+        specifier: ^0.4.4
+        version: 0.4.4
       smartypants:
         specifier: ^0.2.2
         version: 0.2.2

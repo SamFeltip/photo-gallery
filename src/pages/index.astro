@@ -17,6 +17,9 @@ console.log("gallery count: ", galleries.length);
           <li class="gallery">
             {gallery.data.name && (
               <a href={gallery.data.link}>
+                <h2 style="font-family: Unbounded; margin: 0; font-size: 1.5rem;">
+                  {gallery.data.name}
+                </h2>
                 <span>
                   <MyImage
                     src={gallery.data.previewImg}
@@ -25,9 +28,6 @@ console.log("gallery count: ", galleries.length);
                     height={300}
                   />
                 </span>
-                <h2 style="font-family: Unbounded; margin: 0; font-size: 1.5rem;">
-                  {gallery.data.name}
-                </h2>
               </a>
             )}
           </li>

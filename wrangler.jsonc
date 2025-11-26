@@ -17,6 +17,12 @@
       "binding": "gallery_images",
     },
   ],
+  "kv_namespaces": [
+    {
+      "id": "bec0c1279e1141c8b9669b2c23111cba",
+      "binding": "GALLERY_HASHMAPS",
+    },
+  ],
   "vars": {
     "MY_VARIABLE": "test",
     "DOMAIN": "photos.samfelton.com",

@@ -1,10 +1,7 @@
 export const prerender = false;
 
-import { getPixels } from "@unpic/pixels";
-import { blurhashToCssGradientString } from "@unpic/placeholder";
 import type { APIContext, APIRoute } from "astro";
-import { encode } from "blurhash";
-import { getBlurhash, getBlurhashFromBucket } from "~/lib/getBlurhash";
+import { getBlurhashFromBucket } from "~/lib/getBlurhash";
 
 export const GET: APIRoute = async ({ locals, params }: APIContext) => {
   const id = params.id;
