@@ -1,18 +1,9 @@
 import sitemap from "@astrojs/sitemap";
-import { passthroughImageService, defineConfig } from "astro/config";
+import { defineConfig } from "astro/config";
 import path from "path";
-// import { imageService } from "@unpic/astro/service";
-// import { imageService } from "unpic/providers/cloudflare";
 
 import cloudflare from "@astrojs/cloudflare";
 import { imageService } from "@unpic/astro/service";
-
-/**
- * {
-      // placeholder: "blurhash",
-      // layout: "constrained",
-    }
- */
 
 export default defineConfig({
   site: "https://photos.samfelton.com",

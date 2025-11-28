@@ -1,11 +1,10 @@
 import {
-  S3Client,
   ListObjectsV2Command,
+  S3Client,
   type _Object,
 } from "@aws-sdk/client-s3";
 import type { Loader } from "astro/loaders";
 import { probeImageSize } from "./imageProbe";
-import { transform } from "unpic/providers/cloudflare";
 
 interface R2LoaderOptions {
   /** The Cloudflare Account ID (found in R2 dashboard) */
@@ -40,7 +39,7 @@ export function r2Loader({
 }: R2LoaderOptions): Loader {
   return {
     name: "r2-bucket-loader",
-    load: async ({ store, logger, parseData }) => {
+    load: async ({ store, logger }) => {
       logger.info(`Fetching contents from R2 bucket: ${bucket}`);
 
       const client = new S3Client({

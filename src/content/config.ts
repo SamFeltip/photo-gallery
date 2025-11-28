@@ -1,5 +1,5 @@
 // src/content/config.ts
-import { defineCollection, reference, z } from "astro:content";
+import { defineCollection, z } from "astro:content";
 // import { cldAssetsLoader } from "astro-cloudinary/loaders";
 
 import { file } from "astro/loaders";

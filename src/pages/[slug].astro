@@ -123,7 +123,7 @@ function toTitleCase(str: string) {
     <section class="justified-gallery" id="photoswipe">
       {
         gallery?.data.groups.length == 0 &&
-          galleryCollection.map((galleryItem, index) => {
+          galleryCollection.map((galleryItem) => {
             console.log({ galleryItem });
             return (
               <a
