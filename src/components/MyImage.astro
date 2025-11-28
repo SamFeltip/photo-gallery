@@ -23,16 +23,16 @@ try {
 }
 ---
 
-<p>{error}</p>
+{error && <p>{error}</p>}
 <Image
-  src={"/images/" + src}
+  src={src}
   alt={alt}
   width={width}
   height={height}
   background={blurhash}
   options={{
     cloudflare: {
-      domain: "photos.samfelton.com",
+      domain: "image-assets.samfelton.com",
     },
   }}
 />
