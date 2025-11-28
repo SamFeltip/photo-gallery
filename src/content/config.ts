@@ -1,6 +1,4 @@
-// src/content/config.ts
 import { defineCollection, z } from "astro:content";
-// import { cldAssetsLoader } from "astro-cloudinary/loaders";
 
 import { file } from "astro/loaders";
 import { r2Loader } from "~/lib/r2Loader";
