@@ -14,11 +14,7 @@ export const GET: APIRoute = async ({ locals }: APIContext) => {
   });
 };
 
-export const POST: APIRoute = async ({
-  locals,
-  params,
-  request,
-}: APIContext) => {
+export const POST: APIRoute = async ({ locals, request }: APIContext) => {
   console.log("hello world");
   const { gallery_images } = locals.runtime.env;
   const form = await request.formData();

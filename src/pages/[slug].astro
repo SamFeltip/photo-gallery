@@ -1,13 +1,11 @@
 ---
 export const prerender = false;
 
-import BaseLayout from "~/layouts/BaseLayout.astro";
 import "@fancyapps/ui/dist/fancybox/fancybox.css";
-import { getCollection } from "astro:content";
-import type { CollectionEntry } from "astro:content";
 import { getEntry } from "astro:content";
 import MyImage from "~/components/MyImage.astro";
 import type { GalleryImage } from "~/content/config";
+import BaseLayout from "~/layouts/BaseLayout.astro";
 
 const { slug } = Astro.params;
 
@@ -98,7 +96,7 @@ function toTitleCase(str: string) {
               <p style="margin-bottom: 0.5rem; ">{group.description}</p>
             )}
             <div class="justified-gallery">
-              {imgGroups[group.name].map((galleryItem, index) => {
+              {imgGroups[group.name].map((galleryItem) => {
                 return (
                   <a
                     style={`--width: ${galleryItem.width}; --height: ${galleryItem.height};`}
