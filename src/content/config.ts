@@ -6,7 +6,6 @@ import { r2Loader } from "~/lib/r2Loader";
 const galleryImages = z.object({
   key: z.string(),
   url: z.string().url(),
-  lastModified: z.date().optional(),
   width: z.number(),
   height: z.number(),
 });

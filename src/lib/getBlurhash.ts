@@ -62,7 +62,9 @@ export async function getBlurhash(
     console.error(
       `Failed to fetch image at ${remoteImgUrl}: ${res.statusText}`
     );
-    throw new Error(`Failed to fetch image at ${remoteImgUrl}`);
+    throw new Error(
+      `Failed to fetch image at ${remoteImgUrl}: ${res.statusText}`
+    );
   }
 
   const arrayBuffer = await res.arrayBuffer();

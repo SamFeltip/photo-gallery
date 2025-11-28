@@ -2,6 +2,7 @@
 export const prerender = false;
 
 import "@fancyapps/ui/dist/fancybox/fancybox.css";
+import { getCollection } from "astro:content";
 import { getEntry } from "astro:content";
 import MyImage from "~/components/MyImage.astro";
 import BaseLayout from "~/layouts/BaseLayout.astro";
@@ -17,7 +18,12 @@ if (!slug) {
   });
 }
 
+const galleries = await getCollection("galleries");
+console.log("galeries", JSON.stringify({ galleries }));
+
 const gallery = await getEntry("galleries", slug);
+
+console.log("gallery: ", JSON.stringify(gallery));
 
 if (!gallery) {
   return new Response(null, {
@@ -28,9 +34,9 @@ if (!gallery) {
 
 const groupNames: string[] = gallery.data.groups.map((g) => g.name);
 
-const client = new R2CollectionClient({
+const client = new R2CollectionClient(Astro.locals.runtime.env.gallery_images, {
   accountId: Astro.locals.runtime.env.R2_ACCOUNT_ID as string,
-  bucket: Astro.locals.runtime.env.R2_BUCKET_NAME as string,
+  bucketName: Astro.locals.runtime.env.R2_BUCKET_NAME as string,
   accessKeyId: Astro.locals.runtime.env.R2_ACCESS_KEY_ID as string,
   secretAccessKey: Astro.locals.runtime.env.R2_SECRET_ACCESS_KEY as string,
   publicUrl: Astro.locals.runtime.env.R2_PUBLIC_URL as string,
@@ -41,6 +47,12 @@ let collectionItem;
 try {
   collectionItem = await client.getItemBySlug(slug, groupNames);
 } catch (e) {
+  console.error(
+    "Error getting collection item for slug ",
+    slug,
+    (e as Error).message,
+    JSON.stringify((e as any).$response)
+  );
   return new Response(null, {
     status: 404,
     statusText: "couldn't find",
@@ -48,13 +60,14 @@ try {
 }
 
 if (!collectionItem) {
+  console.error("No collection item for slug:", slug);
   return new Response(null, {
     status: 404,
     statusText: "couldn't find",
   });
 }
 
-console.log({ imgGroups: collectionItem.data.imgGroups });
+console.log({ imgGroups: JSON.stringify(collectionItem.data.imgGroups) });
 ---
 
 <BaseLayout

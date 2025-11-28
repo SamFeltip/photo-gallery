@@ -6,6 +6,7 @@ import {
   HeadObjectCommand,
   type _Object,
 } from "@aws-sdk/client-s3";
+import type { GalleryImage } from "~/content/config";
 
 // --- 1. Define Types ---
 
@@ -13,22 +14,13 @@ export interface R2ClientOptions {
   /** Your Cloudflare Account ID. */
   accountId: string;
   /** The name of your R2 bucket. */
-  bucket: string;
+  bucketName: string;
   /** Your R2 Access Key ID. */
   accessKeyId: string;
   /** Your R2 Secret Access Key. */
   secretAccessKey: string;
   /** The public URL base for the bucket (e.g., 'https://your-domain.com/files'). */
   publicUrl: string;
-}
-
-export interface GalleryImage {
-  key: string;
-  url: string;
-  lastModified: Date | undefined;
-  // Added back width and height, now sourced from metadata
-  width: number;
-  height: number;
 }
 
 export interface CollectionItem {
@@ -47,21 +39,14 @@ export interface CollectionItem {
 // --- 2. R2 Collection Client Class ---
 
 export class R2CollectionClient {
-  private client: S3Client;
+  private bucket: R2Bucket;
   private options: R2ClientOptions;
 
-  constructor(options: R2ClientOptions) {
+  constructor(bucket: R2Bucket, options: R2ClientOptions) {
     this.options = options;
     const { accountId, accessKeyId, secretAccessKey } = options;
 
-    this.client = new S3Client({
-      region: "auto",
-      endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
-      credentials: {
-        accessKeyId,
-        secretAccessKey,
-      },
-    });
+    this.bucket = bucket;
   }
 
   /**
@@ -72,13 +57,13 @@ export class R2CollectionClient {
     key: string
   ): Promise<{ width: number; height: number }> {
     const command = new HeadObjectCommand({
-      Bucket: this.options.bucket,
+      Bucket: this.options.bucketName,
       Key: key,
     });
 
-    const response = await this.client.send(command);
+    const response = await this.bucket.get(key);
 
-    const metadata = response.Metadata || {};
+    const metadata = response?.customMetadata || {};
 
     // R2 metadata is always returned in lowercase. Check for 'width' and 'height'.
     const widthStr = metadata["width"] || metadata["w"];
@@ -118,30 +103,22 @@ export class R2CollectionClient {
     slug: string,
     groupNames: string[] = []
   ): Promise<CollectionItem | null> {
-    const { bucket, publicUrl } = this.options;
-    const prefix = `${slug}/`; // List objects only within the specified folder
+    const { bucketName: bucket, publicUrl } = this.options;
 
-    let allObjects: _Object[] = [];
-    let isTruncated = true;
-    let continuationToken: string | undefined = undefined;
+    let allObjects: R2Object[] = [];
 
-    // ... (R2 List logic as before - omitted for brevity)
-    while (isTruncated) {
-      const command: ListObjectsV2Command = new ListObjectsV2Command({
-        Bucket: bucket,
-        Prefix: prefix,
-        ContinuationToken: continuationToken,
-      });
-      const response = await this.client.send(command);
-      if (response.Contents) {
-        allObjects.push(...response.Contents);
-      }
-      isTruncated = response.IsTruncated ?? false;
-      continuationToken = response.NextContinuationToken;
+    let cursor: string | undefined = undefined;
+
+    while (true) {
+      const list = await this.bucket.list({ prefix: slug, cursor });
+      allObjects.push(...list.objects);
+
+      if (!list.truncated) break;
+      cursor = list.cursor;
     }
 
     const imageFiles = allObjects.filter(
-      (obj) => obj.Key && obj.Key !== prefix && !obj.Key.endsWith("/")
+      (obj) => obj.key && obj.key !== slug && !obj.key.endsWith("/")
     );
 
     if (imageFiles.length === 0) {
@@ -151,14 +128,13 @@ export class R2CollectionClient {
     // --- Step 2: Concurrently fetch metadata (width/height) ---
     const imagePromises: Promise<GalleryImage>[] = imageFiles.map(
       async (obj) => {
-        const fileKey = obj.Key!;
+        const fileKey = obj.key!;
         const fileUrl = `${publicUrl}/${fileKey}`;
         const { width, height } = await this.getImageMetadata(fileKey);
 
         return {
           key: fileKey,
           url: fileUrl,
-          lastModified: obj.LastModified,
           width: width,
           height: height,
         };

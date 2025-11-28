@@ -5,6 +5,7 @@ import {
 } from "@aws-sdk/client-s3";
 import type { Loader } from "astro/loaders";
 import { probeImageSize } from "./imageProbe";
+import type { GalleryImage } from "~/content/config";
 
 interface R2LoaderOptions {
   /** The Cloudflare Account ID (found in R2 dashboard) */
@@ -19,14 +20,6 @@ interface R2LoaderOptions {
   publicUrl?: string;
   /** Optional prefix to filter/limit the search to a specific subfolder in the bucket */
   prefix?: string;
-}
-
-interface GalleryImage {
-  key: string;
-  url: string;
-  lastModified?: Date;
-  width: number;
-  height: number;
 }
 
 export function r2Loader({
@@ -100,7 +93,6 @@ export function r2Loader({
         const imageEntry: GalleryImage = {
           key: obj.Key,
           url: fileUrl,
-          lastModified: obj.LastModified,
           width: size.width,
           height: size.height,
         };
