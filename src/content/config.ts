@@ -21,18 +21,6 @@ const gallerySchema = z.object({
   images: z.array(galleryImages),
 });
 
-const r2Images = defineCollection({
-  // Use the custom loader
-  loader: r2Loader({
-    accountId: import.meta.env.R2_ACCOUNT_ID,
-    bucket: import.meta.env.R2_BUCKET_NAME,
-    accessKeyId: import.meta.env.R2_ACCESS_KEY_ID,
-    secretAccessKey: import.meta.env.R2_SECRET_ACCESS_KEY,
-    publicUrl: import.meta.env.R2_PUBLIC_URL,
-  }),
-  schema: gallerySchema,
-});
-
 const galleries = defineCollection({
   loader: file("src/content/galleries.json"),
   schema: () =>
@@ -57,5 +45,4 @@ const galleries = defineCollection({
 export const collections = {
   // galleryCollections: galleryCollections,
   galleries: galleries,
-  r2Images: r2Images,
 };

@@ -4,8 +4,8 @@ export const prerender = false;
 import "@fancyapps/ui/dist/fancybox/fancybox.css";
 import { getEntry } from "astro:content";
 import MyImage from "~/components/MyImage.astro";
-import type { GalleryImage } from "~/content/config";
 import BaseLayout from "~/layouts/BaseLayout.astro";
+import { R2CollectionClient } from "~/lib/r2CollectionClient";
 
 const { slug } = Astro.params;
 
@@ -26,42 +26,39 @@ if (!gallery) {
   });
 }
 
-const collectionImages = await getEntry("r2Images", slug);
+const groupNames: string[] = gallery.data.groups.map((g) => g.name);
 
-if (!collectionImages) {
+const client = new R2CollectionClient({
+  accountId: Astro.locals.runtime.env.R2_ACCOUNT_ID as string,
+  bucket: Astro.locals.runtime.env.R2_BUCKET_NAME as string,
+  accessKeyId: Astro.locals.runtime.env.R2_ACCESS_KEY_ID as string,
+  secretAccessKey: Astro.locals.runtime.env.R2_SECRET_ACCESS_KEY as string,
+  publicUrl: Astro.locals.runtime.env.R2_PUBLIC_URL as string,
+});
+
+let collectionItem;
+
+try {
+  collectionItem = await client.getItemBySlug(slug, groupNames);
+} catch (e) {
   return new Response(null, {
     status: 404,
     statusText: "couldn't find",
   });
 }
 
-// get gallery collection when no groups are present.
-const galleryCollection = collectionImages.data.images.toSorted(
-  (a, b) => a.key?.localeCompare(b.key ?? "") ?? -1
-);
-
-// get gallery groups
-const groupNames: string[] = gallery.data.groups.map((g) => g.name);
-
-const imgGroups: {
-  [key: string]: GalleryImage[];
-} = {};
-
-groupNames.forEach((groupName) => {
-  imgGroups[groupName] = collectionImages.data.images
-    .filter((img) => img.url.indexOf(`_${groupName}_`) !== -1)
-    .toSorted((a, b) => a.key?.localeCompare(b.key ?? "") ?? -1);
-
-  console.log({ groupName, images: imgGroups[groupName].length });
-});
-
-function toTitleCase(str: string) {
-  return str.replace(/\b\w/g, (char) => char.toUpperCase());
+if (!collectionItem) {
+  return new Response(null, {
+    status: 404,
+    statusText: "couldn't find",
+  });
 }
+
+console.log({ imgGroups: collectionItem.data.imgGroups });
 ---
 
 <BaseLayout
-  title={toTitleCase(slug)}
+  title={collectionItem.data.title}
   description=`${slug} photos.`
   image={{ alt: slug, src: gallery?.data.previewImg }}
 >
@@ -96,7 +93,7 @@ function toTitleCase(str: string) {
               <p style="margin-bottom: 0.5rem; ">{group.description}</p>
             )}
             <div class="justified-gallery">
-              {imgGroups[group.name].map((galleryItem) => {
+              {collectionItem.data.imgGroups[group.name].map((galleryItem) => {
                 return (
                   <a
                     style={`--width: ${galleryItem.width}; --height: ${galleryItem.height};`}
@@ -121,8 +118,7 @@ function toTitleCase(str: string) {
     <section class="justified-gallery" id="photoswipe">
       {
         gallery?.data.groups.length == 0 &&
-          galleryCollection.map((galleryItem) => {
-            console.log({ galleryItem });
+          collectionItem.data.galleryCollection.map((galleryItem) => {
             return (
               <a
                 style={`--width: ${galleryItem.width}; --height: ${galleryItem.height};`}
