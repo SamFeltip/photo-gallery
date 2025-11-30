@@ -5,8 +5,14 @@ import { getCollection } from "astro:content";
 import MyImage from "~/components/MyImage.astro";
 import BaseLayout from "~/layouts/BaseLayout.astro";
 
-const galleries = await getCollection("galleries");
+let galleries = await getCollection("galleries");
 console.log("gallery count: ", galleries.length);
+
+const isDev = Astro.url.searchParams.get("isDev");
+
+if (isDev === null) {
+  galleries = galleries.filter((g) => g.id !== "example");
+}
 ---
 
 <BaseLayout>

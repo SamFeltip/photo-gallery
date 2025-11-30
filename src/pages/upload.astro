@@ -1,79 +1,5 @@
 ---
 // src/pages/upload.astro
-import { generateBlurhashFromArrayBuffer } from "~/lib/getBlurhash";
-
-let message = "";
-let messageType = "info";
-
-// --- Server Side Logic ---
-if (Astro.request.method === "POST") {
-  try {
-    const formData = await Astro.request.formData();
-
-    // 1. Get the Original File (for R2)
-    const originalFile = formData.get("file") as File;
-
-    // 2. Get the "Tiny" File (specifically for Blurhash generation)
-    const tinyFile = formData.get("tiny_file") as File;
-
-    const slug = formData.get("slug") as string;
-    const group = formData.get("group") as string;
-
-    // Dimensions calculated by client
-    const widthRaw = formData.get("width") as string;
-    const heightRaw = formData.get("height") as string;
-
-    if (!originalFile || !slug) {
-      throw new Error("Missing file or collection slug.");
-    }
-
-    // --- Generate Blurhash (Fast) ---
-    // We use the tiny file if available, otherwise fall back to original (slow)
-    const fileForBlurhash = tinyFile || originalFile;
-    const blurhashBuffer = await fileForBlurhash.arrayBuffer();
-
-    // This will now run much faster because the buffer is small (~10kb vs 5MB)
-    const blurhash = await generateBlurhashFromArrayBuffer(blurhashBuffer);
-
-    // --- Prepare Filename ---
-    let fileName = originalFile.name;
-    if (group && group.trim() !== "") {
-      const parts = fileName.split(".");
-      const ext = parts.pop();
-      const base = parts.join(".");
-      fileName = `${base}_${group}_.${ext}`;
-    }
-    const objectKey = `${slug}/${fileName}`;
-
-    // --- Upload to R2 ---
-    // Using your specific bucket binding
-    const bucket = Astro.locals.runtime.env.gallery_images as R2Bucket;
-
-    if (!bucket) {
-      throw new Error("R2 Bucket 'gallery_images' not found in env.");
-    }
-
-    // We upload the ORIGINAL huge file to R2, but attach the efficient metadata
-    await bucket.put(objectKey, await originalFile.arrayBuffer(), {
-      httpMetadata: {
-        contentType: originalFile.type,
-      },
-      customMetadata: {
-        width: widthRaw,
-        height: heightRaw,
-        blurhash: blurhash,
-      },
-    });
-
-    message = `Successfully uploaded: ${objectKey}`;
-    messageType = "success";
-  } catch (error) {
-    console.error(error);
-    message =
-      error instanceof Error ? error.message : "An unknown error occurred";
-    messageType = "error";
-  }
-}
 ---
 
 <html lang="en">
@@ -85,12 +11,9 @@ if (Astro.request.method === "POST") {
   <body>
     <main class="container">
       <h1>Upload to Collection</h1>
+      <p class="subtitle">Client-side resize &rarr; JSON API Upload</p>
 
-      <p class="subtitle">
-        Client-side resizing speeds up server-side Blurhash generation.
-      </p>
-
-      {message && <div class={`alert ${messageType}`}>{message}</div>}
+      <div id="status-area" style="display: none;" class="alert"></div>
 
       <form id="uploadForm">
         <div class="form-group">
@@ -105,7 +28,7 @@ if (Astro.request.method === "POST") {
         </div>
 
         <div class="form-group">
-          <label for="group">Group Name</label>
+          <label for="group">Group Name (Optional)</label>
           <input
             type="text"
             id="group"
@@ -126,16 +49,13 @@ if (Astro.request.method === "POST") {
         </div>
 
         <button type="submit" id="submitBtn">Upload Image</button>
-        <p
-          id="loading-text"
-          style="display:none; text-align:center; color:#666;"
-        >
-          Processing & Uploading...
-        </p>
       </form>
     </main>
 
     <script>
+      import type { UploadResponseJson } from "./api/upload";
+
+      // DOM Elements
       const form = document.getElementById("uploadForm") as HTMLFormElement;
       const fileInput = document.getElementById("file") as HTMLInputElement;
       const previewContainer = document.getElementById("preview-container");
@@ -146,26 +66,34 @@ if (Astro.request.method === "POST") {
       const submitBtn = document.getElementById(
         "submitBtn"
       ) as HTMLButtonElement;
-      const loadingText = document.getElementById("loading-text");
+      const statusArea = document.getElementById("status-area");
 
+      // State
       let tinyBlob: Blob | null = null;
       let originalWidth = 0;
       let originalHeight = 0;
 
-      // 1. Preview and Resize Logic
+      // Helper to show messages
+      const showMessage = (msg: string, type: "success" | "error" | "info") => {
+        if (!statusArea) return;
+        statusArea.style.display = "block";
+        statusArea.textContent = msg;
+        statusArea.className = `alert ${type}`;
+      };
+
+      // 1. Handle File Selection & Resizing
       fileInput?.addEventListener("change", (event) => {
         const file = (event.target as HTMLInputElement).files?.[0];
-
         if (file) {
           const objectUrl = URL.createObjectURL(file);
           previewImg.onload = () => {
-            // A. Capture Original Dimensions
+            // A. Get Dimensions
             originalWidth = previewImg.naturalWidth;
             originalHeight = previewImg.naturalHeight;
 
-            // B. Create Tiny Version (Max 100px) for Blurhash
+            // B. Generate Tiny Thumbnail (Canvas)
             const canvas = document.createElement("canvas");
-            const MAX_SIZE = 100;
+            const MAX_SIZE = 100; // 100px is enough for blurhash
             let scale = 1;
 
             if (originalWidth > MAX_SIZE || originalHeight > MAX_SIZE) {
@@ -181,7 +109,6 @@ if (Astro.request.method === "POST") {
             const ctx = canvas.getContext("2d");
             if (ctx) {
               ctx.drawImage(previewImg, 0, 0, canvas.width, canvas.height);
-              // Convert canvas to blob (tiny image)
               canvas.toBlob(
                 (blob) => {
                   tinyBlob = blob;
@@ -191,66 +118,66 @@ if (Astro.request.method === "POST") {
               );
             }
 
-            // UI Updates
+            // Update UI
             if (dimsDisplay)
               dimsDisplay.textContent = `${originalWidth}px x ${originalHeight}px`;
             if (previewContainer) previewContainer.style.display = "block";
-
             URL.revokeObjectURL(objectUrl);
           };
           previewImg.src = objectUrl;
         }
       });
 
-      // 2. Intercept Submit to send Data
+      // 2. Handle Submission via Fetch
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
 
         if (!fileInput.files || fileInput.files.length === 0) return;
 
-        // UI State: Loading
+        // Reset UI
+        showMessage("Uploading and processing...", "info");
         submitBtn.disabled = true;
-        submitBtn.style.opacity = "0.5";
-        if (loadingText) loadingText.style.display = "block";
 
         try {
           const formData = new FormData(form);
 
-          // Add the dimensions we calculated
+          // Append calculated data
           formData.set("width", originalWidth.toString());
           formData.set("height", originalHeight.toString());
-
-          // Add the tiny blob for the server to generate Blurhash quickly
           if (tinyBlob) {
             formData.set("tiny_file", tinyBlob, "tiny_preview.jpg");
           }
 
-          // Perform the upload via fetch to keep control
-          const response = await fetch(window.location.href, {
+          // Call API Endpoint
+          const response = await fetch("/api/upload", {
             method: "POST",
             body: formData,
           });
 
-          // Reload page to show server response (success/error banner)
-          // Or handle manually, but reloading mimics standard form behavior
-          const html = await response.text();
-          document.open();
-          document.write(html);
-          document.close();
+          const result = await response.json<UploadResponseJson>();
+
+          if (response.ok && result.success) {
+            showMessage(`Success! Uploaded: ${result.key}`, "success");
+            form.reset();
+            if (previewContainer) previewContainer.style.display = "none";
+            tinyBlob = null;
+          } else {
+            throw new Error(result.error || "Upload failed");
+          }
         } catch (err) {
           console.error(err);
-          alert("Upload failed.");
+          const msg =
+            err instanceof Error ? err.message : "An unknown error occurred";
+          showMessage(`Error: ${msg}`, "error");
+        } finally {
           submitBtn.disabled = false;
-          if (loadingText) loadingText.style.display = "none";
         }
       });
     </script>
 
     <style>
-      /* --- Styles --- */
       :root {
         --primary: #2563eb;
-        --primary-hover: #1d4ed8;
         --bg: #f8fafc;
         --surface: #ffffff;
         --text: #1e293b;
@@ -258,9 +185,7 @@ if (Astro.request.method === "POST") {
       }
 
       body {
-        font-family:
-          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
-          Arial, sans-serif;
+        font-family: system-ui, sans-serif;
         background-color: var(--bg);
         color: var(--text);
         display: flex;
@@ -279,8 +204,7 @@ if (Astro.request.method === "POST") {
       }
 
       h1 {
-        margin-top: 0;
-        margin-bottom: 0.5rem;
+        margin: 0 0 0.5rem 0;
       }
       .subtitle {
         color: #64748b;
@@ -312,21 +236,28 @@ if (Astro.request.method === "POST") {
         background-color: var(--primary);
         color: white;
         border: none;
-        padding: 0.75rem 1.5rem;
+        padding: 0.75rem;
         border-radius: 6px;
         font-weight: 600;
         cursor: pointer;
         width: 100%;
         font-size: 1rem;
       }
-      button:hover {
-        background-color: var(--primary-hover);
+      button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
       }
 
       .alert {
         padding: 1rem;
         border-radius: 6px;
         margin-bottom: 1.5rem;
+        display: none;
+      }
+      .alert.info {
+        background-color: #eff6ff;
+        color: #1e40af;
+        border: 1px solid #dbeafe;
       }
       .alert.error {
         background-color: #fef2f2;
