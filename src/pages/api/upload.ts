@@ -1,4 +1,5 @@
 // src/pages/api/upload.ts
+import { blurhashToCssGradientString } from "@unpic/placeholder";
 import type { APIRoute } from "astro";
 import { generateBlurhashFromArrayBuffer } from "~/lib/getBlurhash";
 
@@ -32,7 +33,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
     // Use the tiny file if provided (fast), otherwise fallback to original (slow)
     const fileForBlurhash = tinyFile || originalFile;
     const blurhashBuffer = await fileForBlurhash.arrayBuffer();
+
     const blurhash = await generateBlurhashFromArrayBuffer(blurhashBuffer);
+    const cssgradient = blurhashToCssGradientString(blurhash);
+    console.log("CSS Gradient generated!\n=======");
 
     // 4. Construct Filename
     let fileName = originalFile.name;
@@ -68,7 +72,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       customMetadata: {
         width: widthRaw,
         height: heightRaw,
-        blurhash: blurhash,
+        blurhash: cssgradient,
       },
     });
 

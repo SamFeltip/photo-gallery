@@ -3,6 +3,7 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
+    "upload-images": "node ./scripts/upload-images.js",
     "preinstall": "npx only-allow pnpm",
     "dev": "astro dev",
     "start": "astro dev",
@@ -29,16 +30,19 @@
     "blurhash": "^2.0.5",
     "jpeg-js": "^0.4.4",
     "smartypants": "^0.2.2",
-    "typescript": "^5.8.3",
     "unpic": "^4.2.2"
   },
   "devDependencies": {
     "@astrojs/vercel": "^8.2.7",
     "@biomejs/biome": "^2.1.2",
-    "@types/node": "^24.10.0",
-    "sharp": "^0.34.3",
+    "@types/node": "^24.10.1",
+    "dotenv": "^17.2.3",
+    "node-fetch": "^3.3.2",
+    "sharp": "^0.34.5",
     "stylelint": "^16.22.0",
     "stylelint-config-astro": "^1.0.4",
-    "stylelint-config-standard": "^38.0.0"
+    "stylelint-config-standard": "^38.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
   }
 }

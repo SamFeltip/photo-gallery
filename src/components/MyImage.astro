@@ -1,13 +1,17 @@
 ---
 import { Image } from "@unpic/astro";
+import { blurhashToCssGradientString } from "@unpic/placeholder";
 import type { GalleryImage } from "~/content/config";
 import { getBlurhashFromBucket } from "~/lib/getBlurhash";
 
 type Props = GalleryImage;
 
-const { src, key, width, height, blurhash: blurhashConst }: Props = Astro.props;
+const { src, key, width, height, blurhash }: Props = Astro.props;
 
-let blurhash = blurhashConst;
+let cssGradient;
+if (blurhash) {
+  cssGradient = blurhashToCssGradientString(blurhash);
+}
 // if (blurhash === undefined || blurhash === "") {
 //   const bucket = Astro.locals.runtime.env.gallery_images;
 
@@ -20,7 +24,7 @@ let blurhash = blurhashConst;
   alt={key}
   width={width}
   height={height}
-  background={blurhash}
+  background={cssGradient}
   options={{
     cloudflare: {
       domain: "image-assets.samfelton.com",

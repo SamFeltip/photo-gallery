@@ -17,11 +17,16 @@ export async function getBlurhashFromBucket(
   console.log("Fetched object from bucket:", id);
 
   const arrayBuffer = await object.arrayBuffer();
-  return generateBlurhashFromArrayBuffer(arrayBuffer);
+  const blurhash = await generateBlurhashFromArrayBuffer(arrayBuffer);
+
+  const cssgradient = blurhashToCssGradientString(blurhash);
+  console.log("CSS Gradient generated!\n=======");
+
+  return cssgradient;
 }
 
 export const generateBlurhashFromArrayBuffer = async (
-  arrayBuffer: ArrayBuffer
+  arrayBuffer: ArrayBufferLike
 ): Promise<string> => {
   const newArrayBuffer = new Uint8Array(arrayBuffer);
 
@@ -31,10 +36,7 @@ export const generateBlurhashFromArrayBuffer = async (
   const blurhash = encode(data, jpgData.width, jpgData.height, 4, 4);
   console.log("Generated blurhash:", blurhash);
 
-  const cssgradient = blurhashToCssGradientString(blurhash);
-  console.log("CSS Gradient generated!\n=======");
-
-  return cssgradient;
+  return blurhash;
 };
 
 /**
