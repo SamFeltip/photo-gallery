@@ -45,7 +45,7 @@ export class R2CollectionClient {
    * Helper function to fetch specific object metadata.
    * Assumes dimensions are stored in lowercase metadata keys, e.g., 'x-amz-meta-width'.
    */
-  private async getImageMetadata(
+  async getImageMetadata(
     key: string
   ): Promise<{ width: number; height: number; blurhash: string }> {
     const response = await this.bucket.get(key);
