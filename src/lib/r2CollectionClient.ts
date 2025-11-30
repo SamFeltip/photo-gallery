@@ -48,7 +48,7 @@ export class R2CollectionClient {
   async getImageMetadata(
     key: string
   ): Promise<{ width: number; height: number; blurhash: string }> {
-    const response = await this.bucket.get(key);
+    const response = await this.bucket.head(key);
 
     console.log({ meta: response?.customMetadata });
 
