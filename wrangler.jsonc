@@ -26,5 +26,6 @@
   "vars": {
     "MY_VARIABLE": "test",
     "DOMAIN": "photos.samfelton.com",
+    "R2_PUBLIC_URL": "https://image-assets.samfelton.com",
   },
 }

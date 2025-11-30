@@ -1,5 +1,11 @@
 [
   {
+    "id": "example",
+    "name": "example",
+    "previewImg": "preview-example.jpg",
+    "link": "/example"
+  },
+  {
     "id": "surrey",
     "name": "surrey",
     "description": "We went to brockham for their massive bonfire and fireworks show. We also played shuffleboard with some of Dan's family!",

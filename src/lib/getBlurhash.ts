@@ -17,6 +17,12 @@ export async function getBlurhashFromBucket(
   console.log("Fetched object from bucket:", id);
 
   const arrayBuffer = await object.arrayBuffer();
+  return generateBlurhashFromArrayBuffer(arrayBuffer);
+}
+
+export const generateBlurhashFromArrayBuffer = async (
+  arrayBuffer: ArrayBuffer
+): Promise<string> => {
   const newArrayBuffer = new Uint8Array(arrayBuffer);
 
   const jpgData = await getPixels(newArrayBuffer);
@@ -29,7 +35,7 @@ export async function getBlurhashFromBucket(
   console.log("CSS Gradient generated!\n=======");
 
   return cssgradient;
-}
+};
 
 /**
  *
@@ -46,8 +52,6 @@ export async function getBlurhash(
     return val;
   }
 
-  console.log("Generating blurhash for:", src);
-
   const transformedImg = transform(src, {
     width: 32,
     quality: 70,
@@ -56,15 +60,16 @@ export async function getBlurhash(
 
   const remoteImgUrl = "https://image-assets.samfelton.com" + transformedImg;
 
-  // returns a jpg
+  // returns a small jpg
   const res = await fetch(remoteImgUrl);
   if (!res.ok) {
-    console.error(
-      `Failed to fetch image at ${remoteImgUrl}: ${res.statusText}`
-    );
-    throw new Error(
-      `Failed to fetch image at ${remoteImgUrl}: ${res.statusText}`
-    );
+    console.error("Status:", res.status);
+    console.error("Headers:", [...res.headers]);
+    const text = await res.text();
+    console.error(text);
+
+    console.error(`Failed to fetch image at ${src}: ${res.statusText}`);
+    throw new Error(`Failed to fetch image at ${src}: ${res.statusText}`);
   }
 
   const arrayBuffer = await res.arrayBuffer();

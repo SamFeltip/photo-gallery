@@ -1,11 +1,3 @@
-// R2Client.ts
-
-import {
-  S3Client,
-  ListObjectsV2Command,
-  HeadObjectCommand,
-  type _Object,
-} from "@aws-sdk/client-s3";
 import type { GalleryImage } from "~/content/config";
 
 // --- 1. Define Types ---
@@ -55,19 +47,17 @@ export class R2CollectionClient {
    */
   private async getImageMetadata(
     key: string
-  ): Promise<{ width: number; height: number }> {
-    const command = new HeadObjectCommand({
-      Bucket: this.options.bucketName,
-      Key: key,
-    });
-
+  ): Promise<{ width: number; height: number; blurhash: string }> {
     const response = await this.bucket.get(key);
+
+    console.log({ meta: response?.customMetadata });
 
     const metadata = response?.customMetadata || {};
 
     // R2 metadata is always returned in lowercase. Check for 'width' and 'height'.
     const widthStr = metadata["width"] || metadata["w"];
     const heightStr = metadata["height"] || metadata["h"];
+    const blurhash = metadata["blurhash"];
 
     let width = 300;
     if (widthStr) {
@@ -82,6 +72,7 @@ export class R2CollectionClient {
     return {
       width,
       height,
+      blurhash,
     };
   }
 
@@ -111,6 +102,7 @@ export class R2CollectionClient {
 
     while (true) {
       const list = await this.bucket.list({ prefix: slug, cursor });
+
       allObjects.push(...list.objects);
 
       if (!list.truncated) break;
@@ -118,7 +110,11 @@ export class R2CollectionClient {
     }
 
     const imageFiles = allObjects.filter(
-      (obj) => obj.key && obj.key !== slug && !obj.key.endsWith("/")
+      (obj) =>
+        obj.key &&
+        obj.key.indexOf(`${slug}/`) !== -1 &&
+        obj.key !== slug &&
+        !obj.key.endsWith("/")
     );
 
     if (imageFiles.length === 0) {
@@ -129,14 +125,17 @@ export class R2CollectionClient {
     const imagePromises: Promise<GalleryImage>[] = imageFiles.map(
       async (obj) => {
         const fileKey = obj.key!;
+        console.log({ fileKey });
         const fileUrl = `${publicUrl}/${fileKey}`;
-        const { width, height } = await this.getImageMetadata(fileKey);
+        const { width, height, blurhash } =
+          await this.getImageMetadata(fileKey);
 
         return {
           key: fileKey,
-          url: fileUrl,
+          src: fileUrl,
           width: width,
           height: height,
+          blurhash: blurhash,
         };
       }
     );
@@ -159,7 +158,7 @@ export class R2CollectionClient {
     groupNames.forEach((groupName) => {
       // Logic: Filter images where the URL (or key) contains the pattern `_groupName_`
       const groupImages = images
-        .filter((img) => img.url.indexOf(`_${groupName}_`) !== -1)
+        .filter((img) => img.src.indexOf(`_${groupName}_`) !== -1)
         .toSorted((a, b) => a.key?.localeCompare(b.key ?? "") ?? -1);
 
       imgGroups[groupName] = groupImages;
@@ -175,7 +174,7 @@ export class R2CollectionClient {
       data: {
         title: title,
         imageCount: images.length,
-        coverImage: sortedImages[0]?.url || null,
+        coverImage: sortedImages[0]?.src || null,
         galleryCollection: sortedImages,
         imgGroups: imgGroups,
       },

@@ -1,32 +1,23 @@
 ---
 import { Image } from "@unpic/astro";
-import { getBlurhash } from "~/lib/getBlurhash";
+import type { GalleryImage } from "~/content/config";
+import { getBlurhashFromBucket } from "~/lib/getBlurhash";
 
-type Props = {
-  src: string;
-  alt: string;
-  width: number;
-  height: number;
-};
+type Props = GalleryImage;
 
-const { src, alt, width, height }: Props = Astro.props;
+const { src, key, width, height, blurhash: blurhashConst }: Props = Astro.props;
 
-const gimgs = Astro.locals.runtime.env.GALLERY_HASHMAPS;
+let blurhash = blurhashConst;
+// if (blurhash === undefined || blurhash === "") {
+//   const bucket = Astro.locals.runtime.env.gallery_images;
 
-let blurhash;
-let error;
-try {
-  blurhash = await getBlurhash(gimgs, src);
-} catch (e) {
-  console.error("Error getting blurhash for ", src, e);
-  error = (e as Error).message;
-}
+//   blurhash = await getBlurhashFromBucket(bucket, key);
+// }
 ---
 
-{error && <p>{error}</p>}
 <Image
   src={src}
-  alt={alt}
+  alt={key}
   width={width}
   height={height}
   background={blurhash}

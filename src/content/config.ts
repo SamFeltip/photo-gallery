@@ -1,13 +1,13 @@
 import { defineCollection, z } from "astro:content";
 
 import { file } from "astro/loaders";
-import { r2Loader } from "~/lib/r2Loader";
 
 const galleryImages = z.object({
   key: z.string(),
-  url: z.string().url(),
+  src: z.string().url(),
   width: z.number(),
   height: z.number(),
+  blurhash: z.string().optional(),
 });
 
 export type GalleryImage = z.infer<typeof galleryImages>;

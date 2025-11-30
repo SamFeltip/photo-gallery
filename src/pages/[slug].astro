@@ -39,7 +39,7 @@ const client = new R2CollectionClient(Astro.locals.runtime.env.gallery_images, {
   bucketName: Astro.locals.runtime.env.R2_BUCKET_NAME as string,
   accessKeyId: Astro.locals.runtime.env.R2_ACCESS_KEY_ID as string,
   secretAccessKey: Astro.locals.runtime.env.R2_SECRET_ACCESS_KEY as string,
-  publicUrl: Astro.locals.runtime.env.R2_PUBLIC_URL as string,
+  publicUrl: Astro.locals.runtime.env.R2_PUBLIC_URL,
 });
 
 let collectionItem;
@@ -107,18 +107,20 @@ console.log({ imgGroups: JSON.stringify(collectionItem.data.imgGroups) });
             )}
             <div class="justified-gallery">
               {collectionItem.data.imgGroups[group.name].map((galleryItem) => {
+                console.log({ galleryItem });
                 return (
                   <a
                     style={`--width: ${galleryItem.width}; --height: ${galleryItem.height};`}
-                    href={galleryItem.url}
+                    href={galleryItem.src}
                     target="_blank"
                     data-fancybox="gallery"
                   >
                     <MyImage
-                      src={galleryItem.url}
-                      alt={galleryItem.key}
+                      src={galleryItem.src}
+                      key={galleryItem.key}
                       width={galleryItem.width}
                       height={galleryItem.height}
+                      blurhash={galleryItem.blurhash}
                     />
                   </a>
                 );
@@ -135,15 +137,16 @@ console.log({ imgGroups: JSON.stringify(collectionItem.data.imgGroups) });
             return (
               <a
                 style={`--width: ${galleryItem.width}; --height: ${galleryItem.height};`}
-                href={galleryItem.url}
+                href={galleryItem.src}
                 target="_blank"
                 data-fancybox="gallery"
               >
                 <MyImage
-                  src={galleryItem.url}
-                  alt={galleryItem.key}
-                  width={galleryItem.width / 5}
-                  height={galleryItem.height / 5}
+                  src={galleryItem.src}
+                  key={galleryItem.key}
+                  width={galleryItem.width}
+                  height={galleryItem.height}
+                  blurhash={galleryItem.blurhash}
                 />
               </a>
             );

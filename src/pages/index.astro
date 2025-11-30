@@ -23,7 +23,7 @@ console.log("gallery count: ", galleries.length);
                 <span>
                   <MyImage
                     src={gallery.data.previewImg}
-                    alt={gallery.data.name + " preview"}
+                    key={gallery.data.name + " preview"}
                     width={400}
                     height={300}
                   />
