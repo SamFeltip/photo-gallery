@@ -4,9 +4,9 @@ import { blurhashToCssGradientString } from "@unpic/placeholder";
 import type { GalleryImage } from "~/content/config";
 import { getBlurhashFromBucket } from "~/lib/getBlurhash";
 
-type Props = GalleryImage;
+type Props = GalleryImage & { sizes?: string };
 
-const { src, key, width, height, blurhash }: Props = Astro.props;
+const { src, key, width, height, blurhash, sizes }: Props = Astro.props;
 
 let cssGradient;
 if (blurhash) {
@@ -24,6 +24,7 @@ if (blurhash) {
   alt={key}
   width={width}
   height={height}
+  sizes={sizes}
   background={cssGradient}
   options={{
     cloudflare: {
@@ -31,3 +32,7 @@ if (blurhash) {
     },
   }}
 />
+
+<!--
+  sizes={"(min-width: 1600px) 1600px, 100vw"}>
+-->
