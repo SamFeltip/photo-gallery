@@ -1,12 +1,26 @@
 ---
-export const prerender = false;
-
 import "@fancyapps/ui/dist/fancybox/fancybox.css";
 import { getCollection } from "astro:content";
 import { getEntry } from "astro:content";
 import MyImage from "~/components/MyImage.astro";
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import { R2CollectionClient } from "~/lib/r2CollectionClient";
+
+export async function getStaticPaths() {
+  // Fetch all entries from the 'galleries' collection
+  const galleryEntries = await getCollection("galleries");
+
+  // Map over the entries to create the path objects
+  return galleryEntries.map((entry) => ({
+    // The key in params must match the dynamic segment in the filename,
+    // which is 'id' in this case ([id].astro).
+    params: { slug: entry.id },
+
+    // It's helpful to pass the entire entry object as a prop
+    // so the component doesn't have to fetch it again.
+    props: { gallery: entry },
+  }));
+}
 
 const { slug } = Astro.params;
 
