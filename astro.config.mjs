@@ -7,7 +7,7 @@ import { imageService } from "@unpic/astro/service";
 
 export default defineConfig({
   site: "https://photos.samfelton.com",
-  output: "server",
+  output: "static",
   image: {
     domains: ["https://photos.samfelton.com"],
     service: imageService({
