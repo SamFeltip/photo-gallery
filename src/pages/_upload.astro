@@ -1,0 +1,288 @@
+---
+// src/pages/upload.astro
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>R2 Image Uploader</title>
+  </head>
+  <body>
+    <main class="container">
+      <h1>Upload to Collection</h1>
+      <p class="subtitle">Client-side resize &rarr; JSON API Upload</p>
+
+      <div id="status-area" style="display: none;" class="alert"></div>
+
+      <form id="uploadForm">
+        <div class="form-group">
+          <label for="slug">Collection Slug</label>
+          <input
+            type="text"
+            id="slug"
+            name="slug"
+            placeholder="e.g. vacation-2024"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="group">Group Name (Optional)</label>
+          <input
+            type="text"
+            id="group"
+            name="group"
+            placeholder="e.g. details"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="file">Select Image</label>
+          <input type="file" id="file" name="file" accept="image/*" required />
+        </div>
+
+        <div id="preview-container" style="display:none;">
+          <p>Preview:</p>
+          <img id="preview-img" />
+          <p id="dims-display"></p>
+        </div>
+
+        <button type="submit" id="submitBtn">Upload Image</button>
+      </form>
+    </main>
+
+    <script>
+      import type { UploadResponseJson } from "./api/_upload";
+
+      // DOM Elements
+      const form = document.getElementById("uploadForm") as HTMLFormElement;
+      const fileInput = document.getElementById("file") as HTMLInputElement;
+      const previewContainer = document.getElementById("preview-container");
+      const previewImg = document.getElementById(
+        "preview-img"
+      ) as HTMLImageElement;
+      const dimsDisplay = document.getElementById("dims-display");
+      const submitBtn = document.getElementById(
+        "submitBtn"
+      ) as HTMLButtonElement;
+      const statusArea = document.getElementById("status-area");
+
+      // State
+      let tinyBlob: Blob | null = null;
+      let originalWidth = 0;
+      let originalHeight = 0;
+
+      // Helper to show messages
+      const showMessage = (msg: string, type: "success" | "error" | "info") => {
+        if (!statusArea) return;
+        statusArea.style.display = "block";
+        statusArea.textContent = msg;
+        statusArea.className = `alert ${type}`;
+      };
+
+      // 1. Handle File Selection & Resizing
+      fileInput?.addEventListener("change", (event) => {
+        const file = (event.target as HTMLInputElement).files?.[0];
+        if (file) {
+          const objectUrl = URL.createObjectURL(file);
+          previewImg.onload = () => {
+            // A. Get Dimensions
+            originalWidth = previewImg.naturalWidth;
+            originalHeight = previewImg.naturalHeight;
+
+            // B. Generate Tiny Thumbnail (Canvas)
+            const canvas = document.createElement("canvas");
+            const MAX_SIZE = 100; // 100px is enough for blurhash
+            let scale = 1;
+
+            if (originalWidth > MAX_SIZE || originalHeight > MAX_SIZE) {
+              scale = Math.min(
+                MAX_SIZE / originalWidth,
+                MAX_SIZE / originalHeight
+              );
+            }
+
+            canvas.width = originalWidth * scale;
+            canvas.height = originalHeight * scale;
+
+            const ctx = canvas.getContext("2d");
+            if (ctx) {
+              ctx.drawImage(previewImg, 0, 0, canvas.width, canvas.height);
+              canvas.toBlob(
+                (blob) => {
+                  tinyBlob = blob;
+                },
+                "image/jpeg",
+                0.7
+              );
+            }
+
+            // Update UI
+            if (dimsDisplay)
+              dimsDisplay.textContent = `${originalWidth}px x ${originalHeight}px`;
+            if (previewContainer) previewContainer.style.display = "block";
+            URL.revokeObjectURL(objectUrl);
+          };
+          previewImg.src = objectUrl;
+        }
+      });
+
+      // 2. Handle Submission via Fetch
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        if (!fileInput.files || fileInput.files.length === 0) return;
+
+        // Reset UI
+        showMessage("Uploading and processing...", "info");
+        submitBtn.disabled = true;
+
+        try {
+          const formData = new FormData(form);
+
+          // Append calculated data
+          formData.set("width", originalWidth.toString());
+          formData.set("height", originalHeight.toString());
+          if (tinyBlob) {
+            formData.set("tiny_file", tinyBlob, "tiny_preview.jpg");
+          }
+
+          // Call API Endpoint
+          const response = await fetch("/api/upload", {
+            method: "POST",
+            body: formData,
+          });
+
+          const result = await response.json<UploadResponseJson>();
+
+          if (response.ok && result.success) {
+            showMessage(`Success! Uploaded: ${result.key}`, "success");
+            form.reset();
+            if (previewContainer) previewContainer.style.display = "none";
+            tinyBlob = null;
+          } else {
+            throw new Error(result.error || "Upload failed");
+          }
+        } catch (err) {
+          console.error(err);
+          const msg =
+            err instanceof Error ? err.message : "An unknown error occurred";
+          showMessage(`Error: ${msg}`, "error");
+        } finally {
+          submitBtn.disabled = false;
+        }
+      });
+    </script>
+
+    <style>
+      :root {
+        --primary: #2563eb;
+        --bg: #f8fafc;
+        --surface: #ffffff;
+        --text: #1e293b;
+        --border: #e2e8f0;
+      }
+
+      body {
+        font-family: system-ui, sans-serif;
+        background-color: var(--bg);
+        color: var(--text);
+        display: flex;
+        justify-content: center;
+        padding-top: 50px;
+        margin: 0;
+      }
+
+      .container {
+        background-color: var(--surface);
+        padding: 2rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 500px;
+      }
+
+      h1 {
+        margin: 0 0 0.5rem 0;
+      }
+      .subtitle {
+        color: #64748b;
+        margin-bottom: 2rem;
+        font-size: 0.9rem;
+      }
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+
+      label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+      }
+
+      input[type="text"],
+      input[type="file"] {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        box-sizing: border-box;
+        font-size: 1rem;
+      }
+
+      button {
+        background-color: var(--primary);
+        color: white;
+        border: none;
+        padding: 0.75rem;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        width: 100%;
+        font-size: 1rem;
+      }
+      button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .alert {
+        padding: 1rem;
+        border-radius: 6px;
+        margin-bottom: 1.5rem;
+        display: none;
+      }
+      .alert.info {
+        background-color: #eff6ff;
+        color: #1e40af;
+        border: 1px solid #dbeafe;
+      }
+      .alert.error {
+        background-color: #fef2f2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+      }
+      .alert.success {
+        background-color: #f0fdf4;
+        color: #166534;
+        border: 1px solid #bbf7d0;
+      }
+
+      #preview-container {
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        border: 1px dashed var(--border);
+        border-radius: 6px;
+        text-align: center;
+      }
+      #preview-img {
+        max-width: 100%;
+        max-height: 200px;
+        display: block;
+        margin: 0 auto;
+      }
+    </style>
+  </body>
+</html>
